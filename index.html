@@ -1,0 +1,1271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Morning movements</title>
+<meta name="description" content="Morning movements: a quiet timer for a daily routine of gentle exercises, with bells between them, customizable to the time you have. Modeled after Spencer's routine at Wildcard Wellness.">
+<meta name="theme-color" content="#f7f5f0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Movements">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23f7f5f0'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23171713'/%3E%3C/svg%3E">
+<style>
+  @font-face {
+    font-family: "Petrona";
+    src: url("fonts/petrona-roman-variable.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Petrona";
+    src: url("fonts/petrona-italic-variable.woff2") format("woff2");
+    font-style: italic;
+    font-weight: 100 900;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "IBM Plex Mono";
+    src: url("fonts/ibm-plex-mono-roman-variable.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 100 700;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "IBM Plex Mono";
+    src: url("fonts/ibm-plex-mono-italic-variable.woff2") format("woff2");
+    font-style: italic;
+    font-weight: 100 700;
+    font-display: swap;
+  }
+
+  :root {
+    color-scheme: light;
+
+    /* The same warm palette as the Meantime notebook, plus one paler
+       tone for moves that are left out. */
+    --page: #f7f5f0;
+    --page-rest: #efeadf;
+    --ink: #171713;
+    --muted: #625f56;
+    --faint: #a8a195;
+    --oak: #8c7d70;
+    --paper-shadow: #e3dfd5;
+    --ground: var(--page);
+
+    --hallway: 8vw;
+    --threshold: 1.5rem;
+    --landing: 4rem;
+    /* One measure for the paragraphs, the choice, and the settings, so
+       every block in the column shares the same left and right edges. */
+    --measure: 32rem;
+
+    --font-garden: "Petrona", "Iowan Old Style", Baskerville, "Palatino Linotype", Palatino, Georgia, serif;
+    --font-index: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  }
+
+  /* Rests are a shade warmer, so the whole room says "rest" before the words do. */
+  html[data-kind="rest"] { --ground: var(--page-rest); }
+
+  * { box-sizing: border-box; }
+
+  html {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-garden);
+    font-synthesis: none;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    transition: background-color 900ms ease;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0;
+    padding: var(--threshold) var(--hallway) var(--landing);
+  }
+
+  main {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  h1, h2, p, ol { margin-top: 0; }
+
+  .meta {
+    font-family: var(--font-index);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  a { color: inherit; text-underline-offset: 0.2em; }
+  a:hover { text-decoration-thickness: 0.12em; }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 4px;
+  }
+
+  /* Text buttons, in the notebook's manner: underlined words, no boxes. */
+  .textbtn {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    font-family: var(--font-index);
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    white-space: nowrap;
+  }
+  .textbtn:hover { text-decoration-thickness: 0.12em; }
+
+  /* A button that lives inside a sentence and reads like a link. */
+  .inline {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    white-space: nowrap;
+  }
+  .inline:hover { text-decoration-thickness: 2px; }
+
+  /* The one shaped control on the page. */
+  .pill {
+    display: inline-block;
+    margin: 0;
+    padding: 0.45em 1.4em 0.5em;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--page);
+    font: inherit;
+    font-size: 1.2rem;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+  }
+  .pill:hover { background: var(--muted); border-color: var(--muted); }
+  .pill[disabled] {
+    background: transparent;
+    border-color: var(--paper-shadow);
+    color: var(--faint);
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .sep { color: var(--muted); }
+
+  /* Header */
+  .top { padding: clamp(0.5rem, 2vw, 1.5rem) 0 0; }
+  .wordmark {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  .screen[hidden] { display: none !important; }
+
+  /* Start: the routine alone until a choice is made, then the checklist
+     beside it on a wide window, below it on a narrow one. */
+  .start {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    padding-top: clamp(1.5rem, 5vh, 4rem);
+  }
+  .start-info { max-width: var(--measure); }
+  .start-list { max-width: var(--measure); }
+  .start-list[hidden] { display: none; }
+  .para {
+    margin: 0 0 1.25rem;
+    font-size: 1.05rem;
+    text-wrap: pretty;
+  }
+  .para[hidden] { display: none; }
+  .bell-icon {
+    width: 0.9em;
+    height: 0.9em;
+    margin-right: 0.28em;
+    vertical-align: -0.1em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* The two ways in. */
+  .choose { margin: 0 0 1.5rem; }
+  .choose .para { margin-bottom: 0.6rem; }
+  .choice {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin: 0 0 0.45rem;
+    font-size: 1.05rem;
+    cursor: pointer;
+  }
+  .actions { margin: 0.5rem 0 0; }
+
+  /* The settings, held in a dotted hairline box that spans the column's
+     measure, the way the Meantime About page holds its dictionary cut. */
+  .settings {
+    margin: 0.25rem 0 1.5rem;
+    padding: clamp(1.1rem, 3.5vw, 1.4rem);
+    border: 1px dotted var(--paper-shadow);
+    font-family: var(--font-index);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.8rem;
+    letter-spacing: 0.02em;
+  }
+  .settings[hidden] { display: none; }
+  .settings .lbl { color: var(--muted); }
+  .settings .row {
+    display: grid;
+    grid-template-columns: 11.5rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0 1rem;
+    margin: 0 0 0.75rem;
+  }
+  .settings .row-time {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+    margin: 0 0 1.1rem;
+  }
+  .time-field { display: inline-flex; align-items: center; gap: 0.7rem; white-space: nowrap; }
+  .settings output { white-space: nowrap; }
+  .stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+  .stepper input {
+    width: 3.4ch;
+    margin: 0;
+    padding: 0.15rem 0.2rem 0.2rem;
+    border: 0;
+    border-bottom: 1px solid var(--ink);
+    border-radius: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    text-align: center;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+  .stepper input::-webkit-outer-spin-button,
+  .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .step {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--paper-shadow);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.95rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .step:hover { border-color: var(--ink); }
+  .outcome {
+    margin: 1.4rem 0 0;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+  .outcome p { margin: 0 0 0.9rem; }
+  .outcome p:last-child { margin-bottom: 0; }
+  .outcome strong { font-weight: 500; color: var(--ink); }
+  .settings-foot { margin: 1.2rem 0 0; }
+  #summary strong { font-weight: 600; }
+  @media (max-width: 30rem) {
+    .settings .row { grid-template-columns: minmax(0, 1fr) auto; }
+    .settings .row > .lbl { grid-column: 1 / -1; margin-bottom: 0.25rem; }
+    /* On a phone the body-area tags would push long names onto two
+       lines; the rows stay one line each without them. */
+    .move .area { display: none; }
+  }
+
+  input[type="radio"] {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 0 0 auto;
+    width: 12px;
+    height: 12px;
+    margin: 0;
+    border: 1px solid var(--ink);
+    border-radius: 50%;
+    background: var(--page);
+    cursor: pointer;
+  }
+  input[type="radio"]:checked {
+    background: var(--ink);
+    box-shadow: inset 0 0 0 2px var(--page);
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 1.5rem;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-runnable-track {
+    height: 1px;
+    background: var(--ink);
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    margin-top: -6.5px;
+    border: 1px solid var(--ink);
+    border-radius: 50%;
+    background: var(--page);
+  }
+  input[type="range"]::-moz-range-track {
+    height: 1px;
+    background: var(--ink);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border: 1px solid var(--ink);
+    border-radius: 50%;
+    background: var(--page);
+  }
+
+  /* The checklist of moves, the same size on every screen: a checked box
+     and full ink for a move that is in, an empty box and pale ink for one
+     left out. */
+  .list-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.25rem 1rem;
+    margin: var(--landing) 0 0.5rem;
+  }
+  .list-status { white-space: nowrap; }
+  .list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--paper-shadow);
+  }
+  .list li {
+    border-bottom: 1px solid var(--paper-shadow);
+    font-size: 0.95rem;
+  }
+  .move {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    width: 100%;
+    margin: 0;
+    padding: 0.24rem 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    line-height: 1.3;
+    text-align: left;
+    cursor: pointer;
+  }
+  .move .n {
+    flex: 0 0 2ch;
+    text-align: right;
+    font-family: var(--font-index);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    color: var(--muted);
+  }
+  .move .box {
+    position: relative;
+    flex: 0 0 auto;
+    align-self: center;
+    width: 0.8em;
+    height: 0.8em;
+    border: 1px solid currentColor;
+  }
+  li.is-in .move .box { background: var(--ink); border-color: var(--ink); }
+  li.is-in .move .box::after {
+    content: "";
+    position: absolute;
+    left: 29%;
+    top: 6%;
+    width: 28%;
+    height: 58%;
+    border: solid var(--page);
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+  }
+  li.is-in .nm { font-weight: 500; }
+  li.is-out { color: var(--faint); }
+  li.is-out .n, li.is-out .area { color: var(--faint); }
+  .move .area {
+    margin-left: auto;
+    padding-left: 0.75rem;
+    font-family: var(--font-index);
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .list-foot { margin: 0.75rem 0 0; }
+  .list-foot[hidden] { display: none; }
+
+  /* Session. Every line keeps its height whether or not it has text,
+     so nothing below it moves when the phase changes. */
+  .session {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--threshold) 0 var(--landing);
+  }
+  .phase, .next { margin: 0; line-height: 1.5; min-height: 1.5em; }
+  .name {
+    margin: 0.35rem 0 0;
+    font-size: clamp(2.4rem, 7.5vw, 5rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    max-width: 14ch;
+    min-height: 2.16em;
+  }
+  .name.is-rest { font-style: italic; color: var(--muted); }
+  .name.is-ready { font-style: italic; }
+  .count {
+    margin: clamp(1rem, 4vh, 2.5rem) 0 0;
+    font-family: var(--font-index);
+    font-variant-numeric: tabular-nums;
+    font-weight: 300;
+    font-size: clamp(5.5rem, 22vw, 12rem);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    transition: opacity 400ms ease;
+  }
+  html[data-paused] .count { opacity: 0.35; }
+  .next { margin-top: clamp(1rem, 3vh, 1.5rem); }
+
+  /* One dash per exercise: done in ink, current in oak, ahead in paper. */
+  .dashes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin: clamp(1.5rem, 5vh, 3rem) 0 0;
+  }
+  .dashes i {
+    display: block;
+    width: clamp(0.6rem, 2vw, 1.1rem);
+    height: 2px;
+    background: var(--paper-shadow);
+    transition: background-color 400ms ease;
+  }
+  .dashes i.is-done { background: var(--ink); }
+  .dashes i.is-now { background: var(--oak); }
+
+  .session-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem 1.5rem;
+    margin: clamp(2rem, 6vh, 4rem) 0 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--paper-shadow);
+    max-width: 40rem;
+  }
+  .session-actions .group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 0.75rem;
+  }
+  .left { margin: 0; white-space: nowrap; }
+
+  /* Finish */
+  .finish {
+    max-width: 36rem;
+    padding-top: clamp(2.5rem, 8vh, 5rem);
+  }
+  .thanks {
+    margin: 0 0 1rem;
+    font-size: clamp(2rem, 5vw, 4.25rem);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.12;
+  }
+  .finish .meta { margin: 0 0 0.4rem; }
+  .finish-actions { margin: clamp(2rem, 6vh, 3.5rem) 0 0; }
+
+  /* Wide window: the open list takes a second column. */
+  @media (min-width: 60rem) {
+    .start.is-open {
+      grid-template-columns: minmax(0, var(--measure)) minmax(15rem, 26rem);
+      column-gap: clamp(3rem, 7vw, 7rem);
+    }
+    .start.is-open .start-list { max-width: none; }
+    .list-head { margin-top: 0.3rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html, .count, .dashes i, .pill { transition: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header class="top">
+    <p class="wordmark">Morning movements</p>
+  </header>
+
+  <section class="screen start" id="screen-start">
+    <div class="start-info">
+      <p class="para">Loosen up your body, ease aches and tension, and get your morning started with this routine of simple, dynamic movements, inspired by Spencer at <a href="https://wildcardwellness.co/" rel="noopener">Wildcard Wellness</a>.</p>
+      <p class="para" id="bells-note"></p>
+      <div class="choose" role="radiogroup" aria-labelledby="choose-label">
+        <p class="para" id="choose-label">To begin, please select an option:</p>
+        <label class="choice"><input type="radio" name="choice" value="original"> I want the full original routine</label>
+        <label class="choice"><input type="radio" name="choice" value="custom"> I want to customize my routine</label>
+      </div>
+      <div class="settings" id="settings" hidden>
+        <div class="row-time">
+          <label class="lbl" for="minutes">How much time do you have?</label>
+          <span class="time-field">
+            <span class="stepper">
+              <button class="step" type="button" data-d="-1" aria-label="One minute less">&minus;</button>
+              <input type="number" id="minutes" min="1" max="60" step="1" inputmode="numeric">
+              <button class="step" type="button" data-d="1" aria-label="One minute more">+</button>
+            </span>
+            <span>minutes</span>
+          </span>
+        </div>
+        <div class="row">
+          <label class="lbl" for="work">Time per exercise</label>
+          <input type="range" id="work" min="10" max="120" step="5">
+          <output id="work-out" for="work"></output>
+        </div>
+        <div class="row">
+          <label class="lbl" for="rest">Rest between exercises</label>
+          <input type="range" id="rest" min="0" max="60" step="5">
+          <output id="rest-out" for="rest"></output>
+        </div>
+        <div class="outcome" id="outcome"></div>
+        <p class="settings-foot"><button class="textbtn" id="reset-timing" type="button">Reset to default</button></p>
+      </div>
+      <p class="para" id="summary" hidden></p>
+      <p class="actions">
+        <button class="pill" id="begin" type="button" disabled>Begin</button>
+      </p>
+    </div>
+    <div class="start-list" id="start-list" hidden>
+      <h2 class="list-head meta"><span>List of exercises</span><span class="list-status" id="list-status"></span></h2>
+      <ol class="list" id="list"></ol>
+      <p class="list-foot" id="list-foot" hidden><button class="textbtn" id="pick-again" type="button">Pick again</button></p>
+    </div>
+  </section>
+
+  <section class="screen session" id="screen-session" hidden aria-live="polite">
+    <p class="phase meta" id="phase"></p>
+    <h1 class="name" id="name"></h1>
+    <p class="count" id="countdown"></p>
+    <p class="next meta" id="next"></p>
+    <div class="dashes" id="dashes" aria-hidden="true"></div>
+    <p class="session-actions">
+      <span class="group">
+        <button class="textbtn" id="pause" type="button">Pause</button>
+        <span class="sep" aria-hidden="true">·</span>
+        <button class="textbtn" id="skip" type="button">Skip</button>
+        <span class="sep" aria-hidden="true">·</span>
+        <button class="textbtn" id="end" type="button">End</button>
+      </span>
+      <span class="left meta" id="left"></span>
+    </p>
+  </section>
+
+  <section class="screen finish" id="screen-finish" hidden>
+    <h1 class="thanks">Thank you for finishing.</h1>
+    <p class="meta" id="finish-date"></p>
+    <p class="finish-actions">
+      <button class="textbtn" id="again" type="button">Back to the beginning</button>
+    </p>
+  </section>
+</main>
+
+<script>
+(() => {
+  'use strict';
+
+  // ---------- The sequence ----------
+  // Each move with the part of the body it mostly works. The order is
+  // Spencer's, gentle first and strong last, and a shorter day keeps it.
+  const MOVES = [
+    ['Lymphatic hops', 'circulation'],
+    ['Body waves', 'spine'],
+    ['Arm swings', 'shoulders & arms'],
+    ['Trunk twists', 'spine'],
+    ['Forward arm circles', 'shoulders & arms'],
+    ['Bent over back shakes', 'spine'],
+    ['Backward arm circles', 'shoulders & arms'],
+    ['Dead arms', 'spine'],
+    ['Golf swings', 'spine'],
+    ['Marches', 'hips & legs'],
+    ['Tiptoe arm swings', 'hips & legs'],
+    ['Twist the waist', 'spine'],
+    ['Ballet squats', 'hips & legs'],
+    ['Wide arm step backs', 'hips & legs'],
+    ['Backstep wave lunges', 'hips & legs'],
+    ['Pushups', 'shoulders & arms'],
+    ['Jump rope', 'circulation'],
+  ];
+  const N = MOVES.length;
+  const allIdx = () => MOVES.map((m, i) => i);
+
+  // ---------- Settings ----------
+  // The original routine always runs at BASE: 60 seconds a move, 15 of
+  // rest, all 17. Custom settings live beside it and only apply when
+  // "customize" is chosen. Remembered in this browser. For a one-off
+  // timing of the original, add it to the address:
+  // index.html?work=45&rest=20&ready=5
+  const BASE = { work: 60, rest: 15, ready: 10, minutes: 21 };
+  const q = new URLSearchParams(location.search);
+  for (const key of ['work', 'rest', 'ready']) {
+    if (!q.has(key)) continue;
+    const v = Number(q.get(key));
+    if (Number.isFinite(v) && v >= (key === 'work' ? 1 : 0)) BASE[key] = v;
+  }
+  const SETTINGS = 'morning-qigong-settings';
+
+  const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+  const clampMinutes = (v) => Math.min(60, Math.max(1, Math.round(v)));
+
+  const validIdx = (arr) => Array.isArray(arr)
+    ? [...new Set(arr.filter((i) => Number.isInteger(i) && i >= 0 && i < N))].sort((a, b) => a - b)
+    : null;
+
+  function loadSettings() {
+    try {
+      const s = JSON.parse(localStorage.getItem(SETTINGS));
+      const out = {};
+      if (s && ['original', 'custom'].includes(s.choice)) out.choice = s.choice;
+      if (s && Number.isFinite(s.minutes) && s.minutes >= 1) out.minutes = clampMinutes(s.minutes);
+      if (s && Number.isFinite(s.work) && s.work >= 1) out.work = s.work;
+      if (s && Number.isFinite(s.rest) && s.rest >= 0) out.rest = s.rest;
+      if (s && validIdx(s.set) && Number.isInteger(s.setFor)) { out.set = validIdx(s.set); out.setFor = s.setFor; }
+      return out;
+    } catch (e) { return {}; }
+  }
+  function saveSettings() {
+    try {
+      localStorage.setItem(SETTINGS, JSON.stringify({
+        choice: cfg.choice, minutes: cfg.minutes, work: cfg.work, rest: cfg.rest, set: cfg.set, setFor: cfg.setFor,
+      }));
+    } catch (e) {}
+  }
+
+  const cfg = { choice: null, minutes: BASE.minutes, work: BASE.work, rest: BASE.rest, set: null, setFor: null, ...loadSettings() };
+
+  // The durations in force: the custom ones only once "customize" is chosen.
+  const eff = () => cfg.choice === 'custom' ? { work: cfg.work, rest: cfg.rest } : { work: BASE.work, rest: BASE.rest };
+
+  // How many moves the available minutes hold at the custom durations.
+  const fits = () => Math.min(N, Math.max(1, Math.floor((cfg.minutes * 60 + cfg.rest) / (cfg.work + cfg.rest))));
+
+  // ---------- Choosing moves ----------
+  function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // n moves in the routine's order, spread across the body areas in the
+  // same proportions as the full routine, at least one from each when
+  // there is room.
+  function balancedPick(n) {
+    if (n >= N) return allIdx();
+    const byArea = {};
+    MOVES.forEach(([, area], i) => { (byArea[area] = byArea[area] || []).push(i); });
+    const areas = Object.keys(byArea);
+    const share = (a) => n * byArea[a].length / N;
+    const quota = {};
+    let assigned = 0;
+    for (const a of areas) {
+      quota[a] = Math.min(byArea[a].length, Math.max(n >= areas.length ? 1 : 0, Math.floor(share(a))));
+      assigned += quota[a];
+    }
+    const byRemainder = areas.slice().sort((x, y) => (share(y) - Math.floor(share(y))) - (share(x) - Math.floor(share(x))));
+    for (let guard = 0; assigned < n && guard < 100; guard++) {
+      const a = byRemainder[guard % byRemainder.length];
+      if (quota[a] < byArea[a].length) { quota[a]++; assigned++; }
+    }
+    for (let guard = 0; assigned > n && guard < 100; guard++) {
+      const a = areas.slice().sort((x, y) => quota[y] - quota[x])[0];
+      if (quota[a] > 0) { quota[a]--; assigned--; }
+    }
+    const picked = [];
+    for (const a of areas) picked.push(...shuffle(byArea[a].slice()).slice(0, quota[a]));
+    return picked.sort((x, y) => x - y);
+  }
+
+  // The custom set: drawn afresh when the time or durations change how
+  // many moves fit; kept, with any hand edits, otherwise.
+  function ensureSet() {
+    const n = fits();
+    if (!cfg.set || cfg.setFor !== n) {
+      cfg.set = balancedPick(n);
+      cfg.setFor = n;
+      saveSettings();
+    }
+  }
+
+  // A new mix of as many moves as are selected now.
+  function pickAgain() {
+    const count = cfg.set && cfg.set.length > 0 ? cfg.set.length : fits();
+    cfg.set = balancedPick(count);
+  }
+
+  function activeMoves() {
+    if (cfg.choice !== 'custom') return allIdx();
+    ensureSet();
+    return cfg.set;
+  }
+
+  // ---------- Segments ----------
+  // Laid end to end: ready, then work / rest / work / ... / work.
+  let segments = [], TOTAL = 0, LAST = null, names = [];
+  function build() {
+    const { work, rest } = eff();
+    names = activeMoves().map((i) => MOVES[i][0]);
+    segments = [];
+    let at = 0;
+    const push = (seg) => { seg.start = at; at += seg.dur; seg.end = at; segments.push(seg); };
+    push({ kind: 'ready', dur: BASE.ready, index: 0 });
+    names.forEach((name, i) => {
+      push({ kind: 'work', dur: work, index: i, name });
+      if (rest > 0 && i < names.length - 1) push({ kind: 'rest', dur: rest, index: i + 1 });
+    });
+    TOTAL = at;
+    LAST = segments[segments.length - 1];
+  }
+
+  // The routine's own length, without the get-ready count.
+  const routineSeconds = () => {
+    const { work, rest } = eff();
+    return names.length * work + Math.max(0, names.length - 1) * rest;
+  };
+
+  // Which bell sounds when a segment ends.
+  const cueFor = (seg) => {
+    if (seg.kind !== 'work') return 'begin';
+    if (seg === LAST) return 'finish';
+    return eff().rest > 0 ? 'rest' : 'begin';
+  };
+
+  // ---------- Elements ----------
+  const $ = (id) => document.getElementById(id);
+  const el = {
+    startSection: $('screen-start'), summary: $('summary'), list: $('list'), listStatus: $('list-status'),
+    listFoot: $('list-foot'), pickAgain: $('pick-again'),
+    begin: $('begin'), bellsNote: $('bells-note'), startList: $('start-list'), settings: $('settings'),
+    minutes: $('minutes'), work: $('work'), rest: $('rest'), workOut: $('work-out'), restOut: $('rest-out'),
+    outcome: $('outcome'), resetTiming: $('reset-timing'),
+    start: $('screen-start'), session: $('screen-session'), finish: $('screen-finish'),
+    phase: $('phase'), name: $('name'), countdown: $('countdown'), next: $('next'), dashes: $('dashes'),
+    pause: $('pause'), skip: $('skip'), end: $('end'), left: $('left'),
+    finishDate: $('finish-date'), again: $('again'),
+  };
+  const html = document.documentElement;
+
+  // ---------- Time ----------
+  const state = { screen: 'start', running: false, base: 0, runStart: 0 };
+  const elapsed = () => state.base + (state.running ? Date.now() - state.runStart : 0); // ms
+  const segmentAt = (s) => segments.find((seg) => s < seg.end) || LAST;
+  const mmss = (s) => {
+    s = Math.max(0, Math.ceil(s));
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  };
+
+  // ---------- Bells ----------
+  // Soft, bowl-like strikes made from a few sine partials. Every bell for the
+  // rest of the session is booked on the audio clock at once, so it sounds on
+  // time even when the browser slows down timers in a background tab.
+  let ctx = null, entry = null;
+  const scheduled = []; // { o, g, at }
+
+  function audio() {
+    if (!ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      ctx = new AC();
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 3200;
+      filter.Q.value = 0.4;
+      const master = ctx.createGain();
+      master.gain.value = 0.8;
+      filter.connect(master);
+      master.connect(ctx.destination);
+      entry = filter;
+      ctx.onstatechange = () => { if (state.screen === 'session' && state.running) armCues(); };
+    }
+    if (ctx.state !== 'running') ctx.resume().catch(() => {});
+    return ctx;
+  }
+
+  function strike(t, f0, level, sustain = 1) {
+    // Each partial: frequency ratio, loudness, and how slowly it fades (seconds).
+    const partials = [
+      [1.000, 1.00, 1.5],
+      [1.004, 0.55, 1.4],
+      [2.756, 0.30, 0.55],
+      [5.404, 0.10, 0.22],
+    ];
+    for (const [ratio, gain, tau] of partials) {
+      const o = ctx.createOscillator();
+      o.type = 'sine';
+      o.frequency.value = f0 * ratio;
+      const g = ctx.createGain();
+      const k = tau * sustain;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(level * gain, t + 0.006);
+      g.gain.setTargetAtTime(0, t + 0.006, k);
+      o.connect(g);
+      g.connect(entry);
+      o.start(t);
+      o.stop(t + 0.006 + k * 7);
+      scheduled.push({ o, g, at: t });
+    }
+  }
+
+  const E4 = 329.63, A4 = 440, CS5 = 554.37;
+  function playCue(kind, t = ctx.currentTime + 0.03) {
+    if (kind === 'rest') {
+      strike(t, E4, 0.38, 1.15);
+    } else if (kind === 'begin') {
+      strike(t, A4, 0.34, 0.8);
+      strike(t + 0.42, A4, 0.34, 0.8);
+    } else if (kind === 'finish') {
+      strike(t, E4, 0.34);
+      strike(t + 0.55, A4, 0.34);
+      strike(t + 1.1, CS5, 0.32, 1.6);
+    }
+  }
+
+  let cuesArmed = false;
+
+  // Drop bells that have not sounded yet; let one already ringing fade on its own.
+  function cancelCues() {
+    if (ctx) {
+      const now = ctx.currentTime;
+      for (const s of scheduled) {
+        if (s.at > now + 0.01) {
+          try { s.o.stop(); } catch (e) {}
+          try { s.o.disconnect(); s.g.disconnect(); } catch (e) {}
+        }
+      }
+      for (let i = scheduled.length - 1; i >= 0; i--) {
+        if (scheduled[i].at > now + 0.01 || scheduled[i].at + 15 < now) scheduled.splice(i, 1);
+      }
+    }
+    cuesArmed = false;
+  }
+
+  function armCues() {
+    cancelCues();
+    if (!ctx || ctx.state !== 'running' || !state.running) return;
+    const now = elapsed() / 1000;
+    const t0 = ctx.currentTime;
+    for (const seg of segments) {
+      if (seg.end <= now + 0.05) continue;
+      playCue(cueFor(seg), t0 + (seg.end - now));
+    }
+    cuesArmed = true;
+  }
+
+  // iPhones mute Web Audio with the ring/silent switch unless the page is
+  // also "playing media". A looping silent clip counts as media.
+  let silent = null;
+  function unlockIOS() {
+    const ios = /iP(hone|ad|od)/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (!ios) return;
+    if (!silent) {
+      const rate = 8000, n = 1600;
+      const buf = new ArrayBuffer(44 + n), v = new DataView(buf);
+      const str = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+      str(0, 'RIFF'); v.setUint32(4, 36 + n, true); str(8, 'WAVE'); str(12, 'fmt ');
+      v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+      v.setUint32(24, rate, true); v.setUint32(28, rate, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true);
+      str(36, 'data'); v.setUint32(40, n, true);
+      new Uint8Array(buf, 44).fill(128);
+      silent = new Audio(URL.createObjectURL(new Blob([buf], { type: 'audio/wav' })));
+      silent.loop = true;
+      silent.setAttribute('playsinline', '');
+    }
+    silent.play().catch(() => {});
+  }
+  function relockIOS() { if (silent) silent.pause(); }
+
+  // ---------- Keep the screen awake during a session ----------
+  let lock = null;
+  async function wake() {
+    try {
+      if ('wakeLock' in navigator && !lock) {
+        lock = await navigator.wakeLock.request('screen');
+        lock.addEventListener('release', () => { lock = null; });
+      }
+    } catch (e) {}
+  }
+  function unwake() {
+    if (lock) { lock.release().catch(() => {}); lock = null; }
+  }
+
+  // ---------- Start screen ----------
+  function show(which) {
+    state.screen = which;
+    el.start.hidden = which !== 'start';
+    el.session.hidden = which !== 'session';
+    el.finish.hidden = which !== 'finish';
+    if (which !== 'session') { html.removeAttribute('data-kind'); html.removeAttribute('data-paused'); }
+    window.scrollTo(0, 0);
+  }
+
+  // The sentence above Begin: exactly what pressing it will start.
+  function renderSummary() {
+    el.summary.hidden = cfg.choice === null;
+    if (cfg.choice === null) return;
+    const n = names.length;
+    const pace = ' Go at whatever pace feels best for you.';
+    if (n === 0) {
+      el.summary.innerHTML = 'No exercises are selected yet. Click their boxes in the list to add some.';
+      return;
+    }
+    const { work, rest } = eff();
+    const minutes = Math.max(1, Math.round(routineSeconds() / 60));
+    const each = n === 1 ? plural(work, 'second') : `${plural(work, 'second')} each`;
+    const restWords = rest > 0 ? `with ${plural(rest, 'second')} of rest in between` : 'with no rest in between';
+    const opening = cfg.choice === 'custom' ? "Today's routine" : 'The default routine';
+    el.summary.innerHTML = `${opening} will take around <strong>${plural(minutes, 'minute')}</strong> in total. This consists of <strong>${plural(n, 'exercise')}</strong> of ${each}, ${restWords}.${pace}`;
+  }
+
+  function renderBells() {
+    // A small speaker beside each bell's name says "press to hear it".
+    const icon = '<svg class="bell-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">'
+      + '<path d="M2.5 6.2h2.6L8.6 3v10L5.1 9.8H2.5z"/>'
+      + '<path d="M10.8 5.6a3.4 3.4 0 0 1 0 4.8"/>'
+      + '<path d="M12.7 3.7a6.1 6.1 0 0 1 0 8.6"/></svg>';
+    const bell = (cue, words) => `<button class="inline" type="button" data-cue="${cue}" title="Hear it">${icon}${words}</button>`;
+    el.bellsNote.innerHTML = eff().rest > 0
+      ? `At the end of each exercise you'll hear ${bell('rest', 'a bell')}: time to rest. At the end of the rest you'll hear ${bell('begin', 'two bells')}: time to start the next exercise. ${bell('finish', 'Three bells')} mean you've finished.`
+      : `At the end of each exercise you'll hear ${bell('begin', 'two bells')}: time to start the next one. ${bell('finish', 'Three bells')} mean you've finished.`;
+  }
+
+  function renderList() {
+    const act = new Set(activeMoves());
+    el.list.innerHTML = MOVES.map(([name, area], i) => {
+      const on = act.has(i);
+      return `<li class="${on ? 'is-in' : 'is-out'}"><button class="move" type="button" role="checkbox" aria-checked="${on}" data-i="${i}">`
+        + `<span class="box" aria-hidden="true"></span><span class="n">${i + 1}</span><span class="nm">${name}</span><span class="area">${area}</span></button></li>`;
+    }).join('');
+    el.listStatus.textContent = `${act.size} of ${N} selected`;
+    el.listFoot.hidden = !(cfg.choice === 'custom' && act.size < N);
+  }
+
+  function renderChoice() {
+    for (const r of document.querySelectorAll('input[name="choice"]')) r.checked = r.value === cfg.choice;
+    const open = cfg.choice !== null;
+    el.startList.hidden = !open;
+    el.startSection.classList.toggle('is-open', open);
+    el.settings.hidden = cfg.choice !== 'custom';
+  }
+
+  function renderSettings() {
+    if (document.activeElement !== el.minutes) el.minutes.value = cfg.minutes;
+    el.work.value = cfg.work;
+    el.rest.value = cfg.rest;
+    el.workOut.textContent = plural(cfg.work, 'second');
+    el.restOut.textContent = cfg.rest > 0 ? plural(cfg.rest, 'second') : 'none';
+    const n = fits();
+    el.outcome.innerHTML = n >= N
+      ? `<p><strong>That's enough time for the full routine, so all ${N} exercises are selected.</strong> You can still remove or re-add individual exercises by clicking their respective boxes.</p>`
+      : `<p><strong>That's room for ${plural(n, 'exercise')}.</strong> We've automatically selected a balanced mix of moves for you, working the shoulders, spine, hips, legs, and overall circulation.</p>`
+        + `<p>To change the selection, press "Pick again" at the bottom of the list for a new mix. You can also add or remove individual exercises by clicking their respective boxes.</p>`;
+  }
+
+  function refresh() {
+    build();
+    renderBells();
+    renderChoice();
+    renderSettings();
+    renderSummary();
+    renderList();
+    el.begin.disabled = cfg.choice === null || names.length === 0;
+  }
+
+  // ---------- Session screen ----------
+  let shown = {};
+  const set = (node, text) => { if (node.textContent !== text) node.textContent = text; };
+
+  function render(s) {
+    const seg = segmentAt(s);
+    const remaining = Math.ceil(seg.end - s);
+    const n = names.length;
+    html.dataset.kind = seg.kind;
+
+    let phase, name, next;
+    if (seg.kind === 'ready') {
+      phase = '';
+      name = 'Get ready';
+      next = `First: ${names[0]}`;
+    } else if (seg.kind === 'work') {
+      phase = `Exercise ${seg.index + 1} of ${n}`;
+      name = seg.name;
+      next = seg.index < n - 1 ? `Next: ${names[seg.index + 1]}` : 'Last exercise';
+    } else {
+      phase = '';
+      name = 'Rest';
+      next = `Next: ${names[seg.index]}`;
+    }
+    if (!state.running) phase = phase ? `${phase} · paused` : 'Paused';
+    set(el.phase, phase);
+    set(el.name, name);
+    el.name.classList.toggle('is-rest', seg.kind === 'rest');
+    el.name.classList.toggle('is-ready', seg.kind === 'ready');
+    set(el.countdown, String(remaining));
+    set(el.next, next);
+    set(el.left, `${mmss(TOTAL - s)} left`);
+
+    if (shown.seg !== seg) {
+      const dashes = el.dashes.children;
+      for (let i = 0; i < dashes.length; i++) {
+        dashes[i].className = i < seg.index && seg.kind !== 'ready' ? 'is-done'
+          : (seg.kind === 'work' && i === seg.index ? 'is-now' : '');
+      }
+      shown.seg = seg;
+    }
+  }
+
+  // ---------- The clock ----------
+  let timer = null, lastTick = -1;
+
+  function tick() {
+    if (state.screen !== 'session') return;
+    const s = elapsed() / 1000;
+    if (!cuesArmed && lastTick >= 0 && ctx && ctx.state === 'running') {
+      for (const seg of segments) {
+        if (seg.end > lastTick && seg.end <= s && seg !== LAST) playCue(cueFor(seg));
+      }
+    }
+    lastTick = s;
+    if (s >= TOTAL) { finish(!cuesArmed); return; }
+    render(s);
+  }
+
+  function startTicker() { if (!timer) timer = setInterval(tick, 100); }
+  function stopTicker() { clearInterval(timer); timer = null; }
+
+  // ---------- Controls ----------
+  function begin() {
+    build();
+    if (cfg.choice === null || names.length === 0) return;
+    audio();
+    unlockIOS();
+    el.dashes.innerHTML = names.map(() => '<i></i>').join('');
+    state.base = 0;
+    state.running = true;
+    state.runStart = Date.now();
+    lastTick = -1;
+    shown = {};
+    el.pause.textContent = 'Pause';
+    show('session');
+    if (BASE.ready === 0 && ctx && ctx.state === 'running') playCue('begin');
+    tick();
+    startTicker();
+    armCues();
+    wake();
+  }
+
+  function pause() {
+    if (!state.running) return;
+    state.base = elapsed();
+    state.running = false;
+    cancelCues();
+    stopTicker();
+    unwake();
+    html.setAttribute('data-paused', '');
+    el.pause.textContent = 'Resume';
+    render(state.base / 1000);
+  }
+
+  function resume() {
+    if (state.running) return;
+    audio();
+    state.running = true;
+    state.runStart = Date.now();
+    lastTick = state.base / 1000;
+    html.removeAttribute('data-paused');
+    el.pause.textContent = 'Pause';
+    tick();
+    startTicker();
+    armCues();
+    wake();
+  }
+
+  function skip() {
+    const seg = segmentAt(elapsed() / 1000);
+    const i = segments.indexOf(seg);
+    if (seg === LAST) { finish(true); return; }
+    const nextSeg = segments[i + 1];
+    state.base = nextSeg.start * 1000;
+    state.runStart = Date.now();
+    lastTick = nextSeg.start;
+    if (state.running) {
+      armCues();
+      if (ctx && ctx.state === 'running') playCue(cueFor(seg));
+    }
+    render(nextSeg.start);
+  }
+
+  function finish(ring) {
+    stopTicker();
+    cancelCues();
+    state.running = false;
+    if (ring && audio() && ctx.state === 'running') playCue('finish');
+    unwake();
+    relockIOS();
+    const date = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+    const minutes = Math.max(1, Math.round(routineSeconds() / 60));
+    el.finishDate.textContent = `${date} · ${plural(names.length, 'exercise')} · ${plural(minutes, 'minute')}`;
+    show('finish');
+  }
+
+  function reset() {
+    stopTicker();
+    cancelCues();
+    state.running = false;
+    state.base = 0;
+    unwake();
+    relockIOS();
+    el.end.textContent = 'End';
+    refresh();
+    show('start');
+  }
+
+  let endArmedAt = 0;
+  function end() {
+    if (Date.now() - endArmedAt < 4000) { reset(); return; }
+    endArmedAt = Date.now();
+    el.end.textContent = 'End · sure?';
+    setTimeout(() => { if (Date.now() - endArmedAt >= 3900) el.end.textContent = 'End'; }, 4000);
+  }
+
+  // ---------- The choice and the settings ----------
+  function change(fn) { fn(); saveSettings(); refresh(); }
+
+  for (const r of document.querySelectorAll('input[name="choice"]')) {
+    r.addEventListener('change', () => change(() => { cfg.choice = r.value; }));
+  }
+  el.minutes.addEventListener('change', () => change(() => {
+    cfg.minutes = clampMinutes(Number(el.minutes.value) || BASE.minutes);
+    el.minutes.value = cfg.minutes;
+  }));
+  for (const b of el.settings.querySelectorAll('.step')) {
+    b.addEventListener('click', () => change(() => { cfg.minutes = clampMinutes(cfg.minutes + Number(b.dataset.d)); }));
+  }
+  el.work.addEventListener('input', () => change(() => { cfg.work = Number(el.work.value); }));
+  el.rest.addEventListener('input', () => change(() => { cfg.rest = Number(el.rest.value); }));
+  el.pickAgain.addEventListener('click', () => change(pickAgain));
+  el.resetTiming.addEventListener('click', () => change(() => {
+    cfg.minutes = BASE.minutes;
+    cfg.work = BASE.work;
+    cfg.rest = BASE.rest;
+    cfg.set = null;
+    cfg.setFor = null;
+  }));
+
+  // The checklist: a press toggles a move. From the original routine, a
+  // press hands you the full set, at the default timing, as a custom one.
+  el.list.addEventListener('click', (e) => {
+    const b = e.target.closest('button.move[data-i]');
+    if (!b) return;
+    const i = Number(b.dataset.i);
+    change(() => {
+      const current = activeMoves().slice();
+      if (cfg.choice !== 'custom') {
+        cfg.choice = 'custom';
+        cfg.minutes = BASE.minutes;
+        cfg.work = BASE.work;
+        cfg.rest = BASE.rest;
+        cfg.setFor = fits();
+      }
+      const chosen = new Set(current);
+      if (chosen.has(i)) chosen.delete(i); else chosen.add(i);
+      cfg.set = [...chosen].sort((a, b2) => a - b2);
+    });
+  });
+
+  el.begin.addEventListener('click', begin);
+  el.pause.addEventListener('click', () => (state.running ? pause() : resume()));
+  el.skip.addEventListener('click', skip);
+  el.end.addEventListener('click', end);
+  el.again.addEventListener('click', reset);
+  el.bellsNote.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-cue]');
+    if (b && audio()) playCue(b.dataset.cue);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (state.screen !== 'session' || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.code === 'Space' || e.key === ' ') { e.preventDefault(); state.running ? pause() : resume(); }
+    else if (e.code === 'ArrowRight' || e.key === 'ArrowRight') { e.preventDefault(); skip(); }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    if (state.screen === 'session' && state.running) wake();
+    else if (state.screen === 'start') refresh();
+    tick();
+  });
+
+  refresh();
+})();
+</script>
+</body>
+</html>
