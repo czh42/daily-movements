@@ -180,11 +180,15 @@
 
   /* Header */
   .top { padding: clamp(0.5rem, 2vw, 1.5rem) 0 0; }
+  /* The title: the page's own voice, italic like "Get ready", "Rest",
+     and "Thank you for finishing", a step larger than the prose. */
   .wordmark {
     margin: 0;
-    font-size: 1.05rem;
+    font-size: clamp(1.4rem, 1.2vw + 1rem, 1.65rem);
+    font-style: italic;
     font-weight: 400;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
   }
 
   .screen[hidden] { display: none !important; }
@@ -195,7 +199,7 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     align-items: start;
-    padding-top: clamp(1.5rem, 5vh, 4rem);
+    padding-top: clamp(1.75rem, 4.5vh, 3rem);
   }
   .start-info { max-width: var(--measure); }
   .start-list { max-width: var(--measure); }
