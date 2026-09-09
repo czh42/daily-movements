@@ -76,6 +76,31 @@ The moves are the `MOVES` list near the top of the script in
 `index.html`, each with its body area. Order matters. Two names follow
 Spencer's list: "Tiptoe arm swings" and "Backstep wave lunges".
 
+## Design notes
+
+Rules that settled over the first day of building, kept here so a future
+change can be checked against them:
+
+- Nothing on the page moves unless you moved it. Panels open below or
+  beside, never by pushing the Begin button around.
+- The moves are listed once. The list is also the selection tool.
+- Every block in the column shares one measure, so the paragraphs, the
+  choices, the settings box, and the sentence above Begin have the same
+  left and right edges.
+- Prose is set in Petrona; controls and labels in IBM Plex Mono. Italic
+  is the page's own voice: the title, "Get ready", "Rest", "Thank you".
+- No word is left hanging alone on a line. Headings balance, paragraphs
+  wrap "pretty", and figures like "15-sec" never break at the hyphen.
+- The sentence above Begin always states exactly what Begin will start,
+  with the minutes and the number of exercises in bold.
+- One way to customize: time available, then durations, then a balanced
+  pick you can edit by hand. The original routine always runs at the
+  default timing whatever the custom settings say.
+- Spencer is credited in the text and linked. The page carries none of
+  his instructions.
+- Rows in the list are the same size on a phone and a laptop; the body
+  area tags hide on phones so every row stays one line.
+
 ## Putting it online later
 
 The folder is a plain static site. Any static host will serve it as is:
