@@ -190,6 +190,9 @@
     letter-spacing: -0.015em;
     line-height: 1.2;
   }
+  /* The title is the way home: plain until the pointer finds it. */
+  .wordmark a { text-decoration: none; }
+  .wordmark a:hover { text-decoration: underline; text-decoration-thickness: 1px; }
 
   .screen[hidden] { display: none !important; }
 
@@ -388,14 +391,17 @@
     border-top: 1px solid var(--paper-shadow);
   }
   .list li {
+    display: flex;
+    align-items: center;
     border-bottom: 1px solid var(--paper-shadow);
     font-size: 0.95rem;
   }
   .move {
+    flex: 1 1 auto;
+    min-width: 0;
     display: flex;
     align-items: baseline;
     gap: 1rem;
-    width: 100%;
     margin: 0;
     padding: 0.24rem 0;
     border: 0;
@@ -451,18 +457,109 @@
   .list-foot { margin: 0.75rem 0 0; }
   .list-foot[hidden] { display: none; }
 
+  /* The small circled i beside a move: press it, or rest the pointer on
+     it, for that move's note. */
+  .info {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    vertical-align: middle;
+  }
+  .info svg {
+    width: 1.05rem;
+    height: 1.05rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.2;
+    stroke-linecap: round;
+  }
+  .info .dot { fill: currentColor; stroke: none; }
+  .info:hover, .info[aria-expanded="true"] { color: var(--ink); }
+  .info[hidden] { display: none; }
+  .list .info { margin-left: 0.25rem; }
+  .name .info { margin-left: 0.1em; vertical-align: 0.12em; }
+  .name .info svg { width: 1.2rem; height: 1.2rem; }
+
+  /* The note: a small card below the mark, with a storyboard of the move
+     and a few words on how it goes and what to keep in mind. */
+  .note {
+    position: absolute;
+    z-index: 5;
+    width: min(23rem, calc(100vw - 2 * var(--hallway)));
+    padding: 1rem 1.15rem 1.1rem;
+    border: 1px solid var(--paper-shadow);
+    background: var(--page);
+    box-shadow: 0 12px 32px -16px rgba(23, 23, 19, 0.4);
+    color: var(--ink);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+  .note[hidden] { display: none; }
+  .note p { margin: 0 0 0.6rem; }
+  .note p:last-child { margin-bottom: 0; }
+  .note-title {
+    font-style: italic;
+    font-size: 1.2rem;
+    letter-spacing: -0.01em;
+  }
+  .note-board {
+    display: flex;
+    gap: 0.25rem;
+    margin: 0 0 0.7rem;
+  }
+  .note-board svg { width: 5.25rem; height: 5.25rem; }
+  .note .meta { display: block; margin-bottom: 0.1rem; }
+
+  /* The figures: hairlines in ink, the far limbs paler, the head a dot. */
+  .fig-svg { display: block; }
+  .fg-ground { stroke: var(--paper-shadow); stroke-width: 1; }
+  .fg-far, .fg-near, .fg-body {
+    fill: none;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .fg-far { stroke: var(--faint); }
+  .fg-near, .fg-body { stroke: var(--ink); }
+  .fg-head { fill: var(--ink); }
+  .fg-extra { fill: none; stroke: var(--oak); stroke-width: 0.9; stroke-dasharray: 1.4 1.6; }
+  .fg-rope { fill: none; stroke: var(--oak); stroke-width: 1; }
+
   /* Session. Every line keeps its height whether or not it has text,
-     so nothing below it moves when the phase changes. */
+     so nothing below it moves when the phase changes. The figure sits
+     beside the count on a narrow window and beside the whole block on a
+     wide one. */
   .session {
     flex: 1 0 auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "phase phase" "name name" "count fig" "next next" "dashes dashes" "actions actions";
+    align-content: center;
+    align-items: center;
+    column-gap: clamp(1rem, 5vw, 2.5rem);
     padding: var(--threshold) 0 var(--landing);
   }
+  .phase { grid-area: phase; }
+  .name { grid-area: name; }
+  .count { grid-area: count; }
+  .fig { grid-area: fig; }
+  .next { grid-area: next; }
+  .dashes { grid-area: dashes; }
+  .session-actions { grid-area: actions; }
   .phase, .next { margin: 0; line-height: 1.5; min-height: 1.5em; }
   .name {
-    margin: 0.35rem 0 0;
+    margin: 0.35rem 0 clamp(1rem, 4vh, 2.5rem);
     font-size: clamp(2.4rem, 7.5vw, 5rem);
     font-weight: 400;
     letter-spacing: -0.02em;
@@ -472,8 +569,17 @@
   }
   .name.is-rest { font-style: italic; color: var(--muted); }
   .name.is-ready { font-style: italic; }
+  .fig {
+    width: clamp(8rem, 40vw, 12rem);
+    justify-self: end;
+    transition: opacity 400ms ease;
+  }
+  .fig svg { display: block; width: 100%; height: auto; }
+  .fig .fg-far, .fig .fg-near, .fig .fg-body { stroke-width: 1.8; }
+  .fig.is-ahead { opacity: 0.5; }
+  .fig[hidden] { display: none; }
   .count {
-    margin: clamp(1rem, 4vh, 2.5rem) 0 0;
+    margin: 0;
     font-family: var(--font-index);
     font-variant-numeric: tabular-nums;
     font-weight: 300;
@@ -537,7 +643,8 @@
   .finish .meta { margin: 0 0 0.4rem; }
   .finish-actions { margin: clamp(2rem, 6vh, 3.5rem) 0 0; }
 
-  /* Wide window: the open list takes a second column. */
+  /* Wide window: the open list takes a second column, and so does the
+     figure during a session. */
   @media (min-width: 60rem) {
     .start.is-open {
       grid-template-columns: minmax(0, var(--measure)) minmax(15rem, 26rem);
@@ -545,17 +652,23 @@
     }
     .start.is-open .start-list { max-width: none; }
     .list-head { margin-top: 0.3rem; }
+    .session {
+      grid-template-columns: minmax(0, 40rem) auto;
+      grid-template-areas: "phase fig" "name fig" "count fig" "next fig" "dashes ." "actions .";
+      column-gap: clamp(2rem, 5vw, 5rem);
+    }
+    .fig { width: clamp(16rem, 42vh, 24rem); justify-self: start; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    html, .count, .dashes i, .pill { transition: none; }
+    html, .count, .dashes i, .pill, .fig { transition: none; }
   }
 </style>
 </head>
 <body>
 <main>
   <header class="top">
-    <p class="wordmark">Morning movements</p>
+    <p class="wordmark"><a id="home" href="./">Morning movements</a></p>
   </header>
 
   <section class="screen start" id="screen-start">
@@ -606,8 +719,9 @@
 
   <section class="screen session" id="screen-session" hidden aria-live="polite">
     <p class="phase meta" id="phase"></p>
-    <h1 class="name" id="name"></h1>
+    <h1 class="name" id="name-box"><span id="name"></span><button class="info" id="name-info" type="button" aria-expanded="false" hidden></button></h1>
     <p class="count" id="countdown"></p>
+    <div class="fig" id="fig" aria-hidden="true" hidden></div>
     <p class="next meta" id="next"></p>
     <div class="dashes" id="dashes" aria-hidden="true"></div>
     <p class="session-actions">
@@ -631,6 +745,14 @@
   </section>
 </main>
 
+<div class="note" id="note" role="dialog" aria-labelledby="note-title" hidden>
+  <p class="note-title" id="note-title"></p>
+  <div class="note-board" id="note-board" aria-hidden="true"></div>
+  <p id="note-how"></p>
+  <p id="note-mind-box"><span class="meta">Keep in mind</span><span id="note-mind"></span></p>
+</div>
+
+<script src="figures.js"></script>
 <script>
 (() => {
   'use strict';
@@ -659,6 +781,63 @@
   ];
   const N = MOVES.length;
   const allIdx = () => MOVES.map((m, i) => i);
+
+  // A note for each move, in two parts: how it goes, and what to keep in
+  // mind. Written here for a newcomer, in our own words. Spencer's own
+  // guidance lives on his site. The drawings are in figures.js.
+  const NOTES = {
+    'Lymphatic hops': [
+      'Bounce lightly in place with soft knees, so the feet barely leave the floor. Let the arms hang loose.',
+      'Keep the bounce small. If hopping bothers your knees, rise onto your toes and drop your heels instead.'],
+    'Body waves': [
+      'Lift the chest, then round down through the upper, middle, and lower back into a shallow squat. Rise back up as the arms swing overhead.',
+      'Keep the eyes forward and the head quiet, so you don\'t get dizzy.'],
+    'Arm swings': [
+      'Swing the arms loosely forward and back at shoulder height, one arm going forward while the other goes back.',
+      'Let the swing carry the arms. Shoulders down and relaxed.'],
+    'Trunk twists': [
+      'Feet hip-width apart, lean slightly forward, and turn the upper body from side to side, letting the arms swing across.',
+      'The hips and feet stay still. Only the trunk turns.'],
+    'Forward arm circles': [
+      'Arms out at shoulder height, the hands tracing small circles, moving forward at the top of each circle.',
+      'Small and loose beats big and tense. Lower the arms for a moment if the shoulders burn.'],
+    'Bent over back shakes': [
+      'Hinge forward at the hips with the knees slightly bent. Let the head and arms hang, and bounce gently.',
+      'This can tire the lower back. Do less of it if your back is fragile, and come up slowly.'],
+    'Backward arm circles': [
+      'The same small circles, with the hands moving backward at the top.',
+      'Keep the circles small. These feel harder than the forward ones.'],
+    'Dead arms': [
+      'Shake the arms loose, then sway the body from side to side so the limp arms swing and slap against you.',
+      'The body moves the arms, not the other way round.'],
+    'Golf swings': [
+      'Feet shoulder-width apart, hands together. Swing the arms from one side to the other like a pendulum, turning the hips and legs along with them.',
+      'Turn the whole body, so the knees are never twisted, and don\'t fling the arms behind you.'],
+    'Marches': [
+      'March in place, lifting one knee at a time. The opposite hand taps the knee while the other arm swings back.',
+      'A slight forward lean helps with balance. Start slow.'],
+    'Tiptoe arm swings': [
+      'Swing the arms forward and up as you rise onto your toes, then drop the heels as the arms swing down.',
+      'The calves tire quickly here. Slowing down is fine.'],
+    'Twist the waist': [
+      'Stand tall and turn from side to side at the waist, the arms fully limp so they wrap around and slap the body. Let the feet pivot with you.',
+      'Let the arms go completely loose.'],
+    'Ballet squats': [
+      'Feet wider than the shoulders, toes turned out. Sink straight down as the arms swing down, then rise as they swing up.',
+      'Keep the back tall and the chest up, rather than folding forward at the hips.'],
+    'Wide arm step backs': [
+      'Step one foot back into a shallow lunge as the arms open wide. Step back to the middle, clap, and switch sides.',
+      'Slow it down until the balance is there.'],
+    'Backstep wave lunges': [
+      'Step one leg back into a lunge while rolling through a body wave, reaching the hands overhead. Then the other side.',
+      'Dropping the back knee is optional. Go gently if your back is sore.'],
+    'Pushups': [
+      'Any kind that lets you keep going: on the floor, on the knees, or with the hands on a couch or a wall.',
+      'Rest whenever you need to. Keep a straight line from head to heels.'],
+    'Jump rope': [
+      'Skip in place, with a rope or without one.',
+      'Small, quick hops on the balls of the feet. Hopping without a rope counts.'],
+  };
 
   // ---------- Settings ----------
   // The original routine always runs at BASE: 60 seconds a move, 15 of
@@ -811,9 +990,12 @@
     minutes: $('minutes'), work: $('work'), rest: $('rest'), workOut: $('work-out'), restOut: $('rest-out'),
     outcome: $('outcome'), resetTiming: $('reset-timing'),
     start: $('screen-start'), session: $('screen-session'), finish: $('screen-finish'),
-    phase: $('phase'), name: $('name'), countdown: $('countdown'), next: $('next'), dashes: $('dashes'),
+    phase: $('phase'), nameBox: $('name-box'), name: $('name'), nameInfo: $('name-info'), countdown: $('countdown'),
+    fig: $('fig'), next: $('next'), dashes: $('dashes'),
+    note: $('note'), noteTitle: $('note-title'), noteBoard: $('note-board'), noteHow: $('note-how'),
+    noteMindBox: $('note-mind-box'), noteMind: $('note-mind'),
     pause: $('pause'), skip: $('skip'), end: $('end'), left: $('left'),
-    finishDate: $('finish-date'), again: $('again'),
+    finishDate: $('finish-date'), again: $('again'), home: $('home'),
   };
   const html = document.documentElement;
 
@@ -853,7 +1035,7 @@
     return ctx;
   }
 
-  function strike(t, f0, level, sustain = 1) {
+  function strike(t, f0, level, sustain = 1, cue = null) {
     // Each partial: frequency ratio, loudness, and how slowly it fades (seconds).
     const partials = [
       [1.000, 1.00, 1.5],
@@ -874,39 +1056,44 @@
       g.connect(entry);
       o.start(t);
       o.stop(t + 0.006 + k * 7);
-      scheduled.push({ o, g, at: t });
+      scheduled.push({ o, g, at: t, cue });
     }
   }
 
   const E4 = 329.63, A4 = 440, CS5 = 554.37;
   function playCue(kind, t = ctx.currentTime + 0.03) {
     if (kind === 'rest') {
-      strike(t, E4, 0.38, 1.15);
+      strike(t, E4, 0.38, 1.15, kind);
     } else if (kind === 'begin') {
-      strike(t, A4, 0.34, 0.8);
-      strike(t + 0.42, A4, 0.34, 0.8);
+      strike(t, A4, 0.34, 0.8, kind);
+      strike(t + 0.42, A4, 0.34, 0.8, kind);
     } else if (kind === 'finish') {
-      strike(t, E4, 0.34);
-      strike(t + 0.55, A4, 0.34);
-      strike(t + 1.1, CS5, 0.32, 1.6);
+      strike(t, E4, 0.34, 1, kind);
+      strike(t + 0.55, A4, 0.34, 1, kind);
+      strike(t + 1.1, CS5, 0.32, 1.6, kind);
     }
   }
 
   let cuesArmed = false;
 
-  // Drop bells that have not sounded yet; let one already ringing fade on its own.
-  function cancelCues() {
+  // Drop bells that have not sounded yet; let one already ringing fade on its
+  // own. When the routine ends on its own, the finish bell is already booked
+  // and its second and third strikes are still to come, so those are kept.
+  function cancelCues(keepFinish = false) {
     if (ctx) {
       const now = ctx.currentTime;
+      const kept = [];
       for (const s of scheduled) {
+        if (keepFinish && s.cue === 'finish') { kept.push(s); continue; }
         if (s.at > now + 0.01) {
           try { s.o.stop(); } catch (e) {}
           try { s.o.disconnect(); s.g.disconnect(); } catch (e) {}
+        } else if (s.at + 15 >= now) {
+          kept.push(s);
         }
       }
-      for (let i = scheduled.length - 1; i >= 0; i--) {
-        if (scheduled[i].at > now + 0.01 || scheduled[i].at + 15 < now) scheduled.splice(i, 1);
-      }
+      scheduled.length = 0;
+      scheduled.push(...kept);
     }
     cuesArmed = false;
   }
@@ -964,10 +1151,12 @@
   // ---------- Start screen ----------
   function show(which) {
     state.screen = which;
+    closeNote();
     el.start.hidden = which !== 'start';
     el.session.hidden = which !== 'session';
     el.finish.hidden = which !== 'finish';
     if (which !== 'session') { html.removeAttribute('data-kind'); html.removeAttribute('data-paused'); }
+    if (which === 'session') figStart(); else figStop();
     window.scrollTo(0, 0);
   }
 
@@ -1006,7 +1195,8 @@
     el.list.innerHTML = MOVES.map(([name, area], i) => {
       const on = act.has(i);
       return `<li class="${on ? 'is-in' : 'is-out'}"><button class="move" type="button" role="checkbox" aria-checked="${on}" data-i="${i}">`
-        + `<span class="box" aria-hidden="true"></span><span class="n">${i + 1}</span><span class="nm">${name}</span><span class="area">${area}</span></button></li>`;
+        + `<span class="box" aria-hidden="true"></span><span class="n">${i + 1}</span><span class="nm">${name}</span><span class="area">${area}</span></button>`
+        + infoMark(name) + '</li>';
     }).join('');
     el.listStatus.textContent = `${act.size} of ${N} selected`;
     el.listFoot.hidden = !(cfg.choice === 'custom' && act.size < N);
@@ -1034,6 +1224,7 @@
   }
 
   function refresh() {
+    closeNote();
     build();
     renderBells();
     renderChoice();
@@ -1070,8 +1261,17 @@
     if (!state.running) phase = phase ? `${phase} · paused` : 'Paused';
     set(el.phase, phase);
     set(el.name, name);
-    el.name.classList.toggle('is-rest', seg.kind === 'rest');
-    el.name.classList.toggle('is-ready', seg.kind === 'ready');
+    el.nameBox.classList.toggle('is-rest', seg.kind === 'rest');
+    el.nameBox.classList.toggle('is-ready', seg.kind === 'ready');
+    // The mark beside the name opens the note for the move the figure shows:
+    // this one, or the next one during the rest.
+    const shownMove = names[seg.index];
+    el.nameInfo.hidden = !shownMove;
+    if (shownMove && el.nameInfo.dataset.name !== shownMove) {
+      el.nameInfo.dataset.name = shownMove;
+      el.nameInfo.setAttribute('aria-label', `Notes: ${shownMove}`);
+      if (note.btn === el.nameInfo) fillNote(shownMove);
+    }
     set(el.countdown, String(remaining));
     set(el.next, next);
     set(el.left, `${mmss(TOTAL - s)} left`);
@@ -1085,6 +1285,123 @@
       shown.seg = seg;
     }
   }
+
+  // ---------- The figure ----------
+  // The line figure beside the count: the move under way, or, during the
+  // get-ready count and the rests, the one coming next, paler. Its clock
+  // is the session's, so it freezes with a pause and starts each move at
+  // its first pose. With reduced motion preferred it holds one still.
+  const Fig = window.Figures || null;
+  const stillMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let figParts = null, figRaf = null, figLast = '';
+
+  function figFrame() {
+    if (state.screen !== 'session' || !Fig) return;
+    if (!figParts) {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('class', 'fig-svg');
+      svg.setAttribute('focusable', 'false');
+      figParts = Fig.make(svg);
+      el.fig.appendChild(svg);
+    }
+    const s = elapsed() / 1000;
+    const seg = segmentAt(s);
+    const name = names[seg.index];
+    if (!name || !Fig.has(name)) { el.fig.hidden = true; return; }
+    el.fig.hidden = false;
+    el.fig.classList.toggle('is-ahead', seg.kind !== 'work');
+    const stills = Fig.stills(name);
+    const phase = stillMotion.matches
+      ? stills[Math.min(1, stills.length - 1)]
+      : ((s - seg.start) / Fig.period(name)) % 1;
+    const key = `${name}@${phase.toFixed(3)}`;
+    if (key === figLast) return;
+    figLast = key;
+    Fig.draw(figParts, Fig.pose(name, phase));
+  }
+  function figLoop() { figFrame(); figRaf = requestAnimationFrame(figLoop); }
+  function figStart() { if (!figRaf && Fig) figRaf = requestAnimationFrame(figLoop); }
+  function figStop() { if (figRaf) cancelAnimationFrame(figRaf); figRaf = null; }
+
+  // ---------- The notes ----------
+  const INFO_ICON = '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">'
+    + '<circle cx="8" cy="8" r="6.6"/><path d="M8 7.2v4.3"/><circle class="dot" cx="8" cy="4.8" r="0.8"/></svg>';
+  const infoMark = (name) => `<button class="info" type="button" data-name="${name}" aria-label="Notes: ${name}" aria-expanded="false">${INFO_ICON}</button>`;
+  el.nameInfo.innerHTML = INFO_ICON;
+
+  // One card for the whole page, filled for the move whose mark was pressed.
+  const note = { btn: null, pinned: false, hover: null };
+
+  function fillNote(name) {
+    el.noteTitle.textContent = name;
+    el.noteBoard.innerHTML = '';
+    if (Fig && Fig.has(name)) for (const ph of Fig.stills(name)) el.noteBoard.appendChild(Fig.still(name, ph));
+    const [how, mind] = NOTES[name] || ['', ''];
+    el.noteHow.textContent = how;
+    el.noteMind.textContent = mind;
+    el.noteMindBox.hidden = !mind;
+  }
+
+  // Below the mark, kept within the page's side margins.
+  function placeNote(btn) {
+    const r = btn.getBoundingClientRect();
+    const pad = parseFloat(getComputedStyle(document.body).paddingLeft) || 16;
+    const width = el.note.offsetWidth;
+    const maxLeft = document.documentElement.clientWidth - width - pad;
+    const left = Math.max(pad, Math.min(r.left, maxLeft)) + window.scrollX;
+    el.note.style.left = `${Math.round(left)}px`;
+    el.note.style.top = `${Math.round(r.bottom + window.scrollY + 8)}px`;
+  }
+
+  function openNote(btn, pinned) {
+    if (note.btn && note.btn !== btn) note.btn.setAttribute('aria-expanded', 'false');
+    note.btn = btn;
+    note.pinned = pinned;
+    fillNote(btn.dataset.name);
+    el.note.hidden = false;
+    placeNote(btn);
+    btn.setAttribute('aria-expanded', 'true');
+  }
+  function closeNote() {
+    clearTimeout(note.hover);
+    if (note.btn) note.btn.setAttribute('aria-expanded', 'false');
+    note.btn = null;
+    note.pinned = false;
+    el.note.hidden = true;
+  }
+
+  // A press pins the note open; a press on the same mark, a press anywhere
+  // else, or Escape closes it.
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('button.info');
+    if (b) {
+      if (note.btn === b && note.pinned) closeNote(); else openNote(b, true);
+      return;
+    }
+    if (!e.target.closest('#note')) closeNote();
+  });
+  // A mouse resting on a mark shows the note; moving away hides it again
+  // unless it was pinned by a press.
+  document.addEventListener('pointerover', (e) => {
+    if (e.pointerType !== 'mouse') return;
+    const b = e.target.closest('button.info');
+    if (!b || note.btn === b) return;
+    clearTimeout(note.hover);
+    note.hover = setTimeout(() => { if (!note.pinned) openNote(b, false); }, 120);
+  });
+  document.addEventListener('pointerout', (e) => {
+    if (e.pointerType !== 'mouse') return;
+    const b = e.target.closest('button.info');
+    if (!b || (e.relatedTarget && b.contains(e.relatedTarget))) return;
+    clearTimeout(note.hover);
+    if (note.pinned) return;
+    note.hover = setTimeout(() => { if (!note.pinned && !el.note.matches(':hover')) closeNote(); }, 220);
+  });
+  el.note.addEventListener('pointerleave', (e) => {
+    if (e.pointerType === 'mouse' && !note.pinned) closeNote();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && note.btn) closeNote(); });
+  window.addEventListener('resize', () => { if (note.btn) placeNote(note.btn); });
 
   // ---------- The clock ----------
   let timer = null, lastTick = -1;
@@ -1169,7 +1486,9 @@
 
   function finish(ring) {
     stopTicker();
-    cancelCues();
+    // A natural end arrives with the finish bell already booked on the audio
+    // clock, so it is left to ring. Skip and End ring their own.
+    cancelCues(!ring);
     state.running = false;
     if (ring && audio() && ctx.state === 'running') playCue('finish');
     unwake();
@@ -1185,6 +1504,7 @@
     cancelCues();
     state.running = false;
     state.base = 0;
+    endArmedAt = 0;
     unwake();
     relockIOS();
     el.end.textContent = 'End';
@@ -1193,11 +1513,21 @@
   }
 
   let endArmedAt = 0;
+  const endArmed = () => Date.now() - endArmedAt < 4000;
   function end() {
-    if (Date.now() - endArmedAt < 4000) { reset(); return; }
+    if (endArmed()) { reset(); return; }
     endArmedAt = Date.now();
     el.end.textContent = 'End · sure?';
     setTimeout(() => { if (Date.now() - endArmedAt >= 3900) el.end.textContent = 'End'; }, 4000);
+  }
+
+  // Home: the start screen with no option chosen and the list closed. The
+  // custom timing and set are kept for the next time "customize" is chosen.
+  // During a session the first press asks, like End; a second press goes.
+  function goHome() {
+    cfg.choice = null;
+    saveSettings();
+    reset();
   }
 
   // ---------- The choice and the settings ----------
@@ -1250,6 +1580,11 @@
   el.skip.addEventListener('click', skip);
   el.end.addEventListener('click', end);
   el.again.addEventListener('click', reset);
+  el.home.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (state.screen === 'session' && !endArmed()) { end(); return; }
+    goHome();
+  });
   el.bellsNote.addEventListener('click', (e) => {
     const b = e.target.closest('button[data-cue]');
     if (b && audio()) playCue(b.dataset.cue);

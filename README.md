@@ -7,14 +7,19 @@ a rest begins, two when the next exercise begins, three when the routine
 is over.
 
 The routine is modeled after Spencer's routine at Wildcard Wellness
-(https://wildcardwellness.co/). This page is only a timer for personal
-use. It carries no instructions for the movements, and it is not
-affiliated with him.
+(https://wildcardwellness.co/). This page is a timer for personal use
+and is not affiliated with him. Beside each move it shows a small line
+figure of the movement and a short note of our own for a newcomer;
+Spencer's own guidance is on his site.
 
 ## Using it
 
 Open `index.html` in a browser. Everything is inside this folder, so it
 works offline and without a server.
+
+The title, "Morning movements", is the way home: pressing it returns to
+the start screen with no option chosen and the list closed. During a
+session it asks first, like End, and a second press goes.
 
 The start screen is two short paragraphs and a choice: **I want the
 full original routine** or **I want to customize my routine**. Whatever
@@ -32,11 +37,25 @@ The bells are explained in the second paragraph. Each bell's name
 carries a small speaker mark; press it to hear that bell before you
 begin.
 
+Every move in the list carries a small circled i at the end of its row.
+Press it, or rest the pointer on it, for that move's note: a storyboard
+of two or three stills, a sentence on how the move goes, and a line to
+keep in mind. A press pins the note open; a press anywhere else, or
+Escape, closes it.
+
 During a session:
 
+- A line figure of the move runs beside the count, repeating the
+  movement for as long as the exercise lasts. During "Get ready" and
+  each rest it shows the move coming next, paler. It freezes with a
+  pause. If the system asks for reduced motion it holds one still
+  instead.
+- The same circled i sits beside the move's name and opens its note.
 - **Pause** / **Resume**, or press the space bar.
 - **Skip** moves to the next exercise or rest, or press the right arrow.
 - **End** asks once more before it stops.
+- Three bells mark the end. They are booked on the audio clock like the
+  others, so they ring on time even if the page is slow to notice.
 
 ## Customizing
 
@@ -76,6 +95,16 @@ The moves are the `MOVES` list near the top of the script in
 `index.html`, each with its body area. Order matters. Two names follow
 Spencer's list: "Tiptoe arm swings" and "Backstep wave lunges".
 
+The notes are the `NOTES` object right below, keyed by the move's name:
+two strings per move, how it goes and what to keep in mind. The figures
+live in `figures.js`, keyed by name as well. Each is a view (side or
+front), a period in seconds, the phases to show as stills, and either a
+list of key poses that are cycled through or a function of the phase.
+A pose is a set of joint angles: limbs are measured from straight down,
+the torso and head from straight up, all positive toward the right. A
+hand can instead be given a point to reach for. A move with no figure
+simply shows none.
+
 ## Design notes
 
 Rules that settled over the first day of building, kept here so a future
@@ -96,8 +125,15 @@ change can be checked against them:
 - One way to customize: time available, then durations, then a balanced
   pick you can edit by hand. The original routine always runs at the
   default timing whatever the custom settings say.
-- Spencer is credited in the text and linked. The page carries none of
-  his instructions.
+- Spencer is credited in the text and linked. The notes and drawings
+  are ours, written and drawn for a newcomer; they describe the
+  movements in our own words and point nowhere else. His own guidance
+  stays on his site.
+- The title is the way home, and home is a blank menu: no option
+  chosen, the list closed, Begin waiting. The custom timing is kept.
+- The figure is a reference, not a performance: hairlines in ink, the
+  far limbs paler, the head a dot, a ground line under the feet. It
+  keeps its place through every phase and never pushes the text around.
 - Rows in the list are the same size on a phone and a laptop; the body
   area tags hide on phones so every row stays one line.
 
