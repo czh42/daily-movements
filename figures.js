@@ -456,13 +456,21 @@
       const g = ramp(u, 0, 0.5), r = ramp(u, 0.5, 1);
       const travel = Math.sin(Math.PI * g) * (1 - r) + Math.sin(Math.PI * r);
       const thigh = -36 * deep, shin = thigh - 30 * travel;
-      const foot = 90 - 50 * clamp(deep + 0.8 * travel, 0, 1);
+      // The front foot stays planted: only its knee bends, and the hip moves
+      // back and down over it. The back foot may rest on its toes but never
+      // reach below the front sole, so nothing lifts.
+      const fThigh = 30 * deep, fShin = -6 * deep;
+      const xf = L.thigh * Math.sin(rad(fThigh)) + L.shin * Math.sin(rad(fShin));
+      const yf = L.thigh * Math.cos(rad(fThigh)) + L.shin * Math.cos(rad(fShin));
+      const yb = L.thigh * Math.cos(rad(thigh)) + L.shin * Math.cos(rad(shin));
+      const flat = Math.acos(clamp((yf - yb) / L.foot, 0, 1)) * 180 / Math.PI;
+      const foot = Math.max(90 - 50 * clamp(deep + 0.8 * travel, 0, 1), flat);
       const ul = -10 + 182 * deep, fl = ul + 6;
-      const back = [thigh, shin, foot], front = [30 * deep, -6 * deep, 90];
+      const back = [thigh, shin, foot], front = [fThigh, fShin, 90];
       const legs = side > 0
         ? { pr: back[0], sr: back[1], ftr: back[2], pl: front[0], sl: front[1], ftl: front[2] }
         : { pl: back[0], sl: back[1], ftl: back[2], pr: front[0], sr: front[1], ftr: front[2] };
-      return { t: 3 - 7 * deep, h: 6 - 14 * deep, ul, fl, ur: ul, fr: fl, ...legs };
+      return { t: 3 - 7 * deep, h: 6 - 14 * deep, ul, fl, ur: ul, fr: fl, dx: 6 - xf, ...legs };
     } },
 
     'Pushups': { view: 'side', period: 1.6, stills: [0, 0.5], pose: (phase) => {
