@@ -113,8 +113,8 @@ the torso and head from straight up, all positive toward the right, and
 a hand can instead be given a point to reach for. Three-quarters on,
 each limb is placed by two angles, one in the plane of walking and one
 out to the side, so that a movement forward and a movement sideways
-both show; that view is used where both matter, as in the arm circles
-and the marches. A move with no figure simply shows none.
+both show; the marches use it, since the knee comes forward while the
+hands go out to the sides. A move with no figure simply shows none.
 
 ## Design notes
 
@@ -145,10 +145,13 @@ change can be checked against them:
 - The figure is a reference, not a performance: hairlines in ink, the
   far limbs paler, the head a dot, a ground line under the feet. It
   keeps its place through every phase and never pushes the text around.
-- The drawings follow how the moves are actually done here, not a
-  generic version: the wave is continuous, the golf swing is a pendulum
-  of the whole body, the marches have a beat between knees, the rope
-  passes under the feet while the body is in the air.
+- The drawings follow how the moves are actually done here, checked
+  against videos of them, not a generic version: the wave is continuous,
+  the arm circles go up the sides and down the front, the golf swing is
+  a pendulum of the whole body with the feet planted, the marches have a
+  beat between knees, the rope keeps its length and passes under the
+  feet while the body is in the air. A movement that never pauses is
+  drawn at a steady pace rather than settling at each pose.
 - Rows in the list are the same size on a phone and a laptop; the body
   area tags hide on phones so every row stays one line.
 

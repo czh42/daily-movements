@@ -43,6 +43,30 @@
     return [elbow, hand];
   }
 
+  // A leg whose ankle is at a given point: thigh and shin angles, with the
+  // knee going to the side `bend` picks. Out of reach, the leg straightens.
+  function legTo(hip, ankle, bend) {
+    const dx = ankle[0] - hip[0], dy = ankle[1] - hip[1];
+    const h = Math.hypot(dx, dy) || 0.001;
+    const d = clamp(h, Math.abs(L.thigh - L.shin) + 0.01, L.thigh + L.shin - 0.01);
+    const base = Math.atan2(dx, dy);
+    const a = Math.acos((L.thigh * L.thigh + d * d - L.shin * L.shin) / (2 * L.thigh * d));
+    const thigh = base + bend * a;
+    const knee = [hip[0] + L.thigh * Math.sin(thigh), hip[1] + L.thigh * Math.cos(thigh)];
+    const shin = Math.atan2(ankle[0] - knee[0], ankle[1] - knee[1]);
+    return [thigh * 180 / Math.PI, shin * 180 / Math.PI];
+  }
+
+  // A straight arm toward a point, no longer than the arm: an arm swung
+  // toward the viewer shows shorter, as it would.
+  function straight(sh, to) {
+    const dx = to[0] - sh[0], dy = to[1] - sh[1];
+    const h = Math.hypot(dx, dy) || 0.001;
+    const len = Math.min(h, L.upper + L.fore);
+    const u = [dx / h, dy / h];
+    return [sh, [sh[0] + u[0] * L.upper, sh[1] + u[1] * L.upper], [sh[0] + u[0] * len, sh[1] + u[1] * len]];
+  }
+
   // The lowest foot point sits on the ground; on the floor, the hands count
   // too. Everything is then moved into the picture.
   function settle(k, p) {
@@ -66,7 +90,8 @@
     const C = rise(S, hd, L.neck + L.head);
     const shL = [S[0] - sw, S[1]], shR = [S[0] + sw, S[1]];
     const hipL = [-hw, 0], hipR = [hw, 0];
-    const arm = (sh, u, f, to, bend) => {
+    const arm = (sh, u, f, to, bend, str) => {
+      if (str) return straight(sh, str);
       if (to) { const [e, w] = reach(sh, to, bend); return [sh, e, w]; }
       const e = limb(sh, u || 0, L.upper);
       return [sh, e, limb(e, f || 0, L.fore)];
@@ -76,8 +101,8 @@
       const a = limb(k, sn || 0, L.shin);
       return [hip, k, a, limb(a, ft, flen == null ? L.foot : flen)];
     };
-    const la = arm(shL, p.ul, p.fl, p.aL, p.bL == null ? -1 : p.bL);
-    const ra = arm(shR, p.ur, p.fr, p.aR, p.bR == null ? 1 : p.bR);
+    const la = arm(shL, p.ul, p.fl, p.aL, p.bL == null ? -1 : p.bL, p.sL);
+    const ra = arm(shR, p.ur, p.fr, p.aR, p.bR == null ? 1 : p.bR, p.sR);
     const ll = leg(hipL, p.pl, p.sl, p.ftl == null ? (side ? 90 : -90) : p.ftl, p.footl);
     const rl = leg(hipR, p.pr, p.sr, p.ftr == null ? 90 : p.ftr, p.footr);
     return settle({ H, S, N, C, la, ra, ll, rl }, p);
@@ -181,10 +206,13 @@
     g.extra.setAttribute('d', extra);
     let rope = '';
     if (p.rope != null) {
-      // A rope from hand to hand: under the feet at 0, over the head at 1.
+      // A rope from hand to hand: just under the feet at 0, and at 1 the
+      // same arc mirrored above the hands, so it keeps its length.
       const a = k.la[2], b = k.ra[2];
-      const apex = (GROUND + 1.5) + p.rope * ((k.C[1] - L.head - 8) - (GROUND + 1.5));
-      const cy = 2 * apex - (a[1] + b[1]) / 2;
+      const hands = (a[1] + b[1]) / 2;
+      const bottom = GROUND - 4;
+      const apex = bottom + p.rope * ((2 * hands - bottom) - bottom);
+      const cy = 2 * apex - hands;
       rope = `M${f1(a[0])} ${f1(a[1])}Q${f1((a[0] + b[0]) / 2)} ${f1(cy)} ${f1(b[0])} ${f1(b[1])}`;
     }
     g.rope.setAttribute('d', p.ropeFront ? '' : rope);
@@ -216,10 +244,12 @@
   }
 
   // Key poses, cycled: the phase runs through them and back to the first.
-  const cycle = (frames) => (phase) => {
+  // Eased by default, so the motion settles at each pose; `even` keeps a
+  // steady pace for a movement that never pauses.
+  const cycle = (frames, even = false) => (phase) => {
     const n = frames.length;
     const x = (((phase % 1) + 1) % 1) * n, i = Math.floor(x);
-    return mix(frames[i], frames[(i + 1) % n], ease(x - i));
+    return mix(frames[i], frames[(i + 1) % n], even ? x - i : ease(x - i));
   };
 
   // ---------- The moves ----------
@@ -229,13 +259,10 @@
   // motion between poses stays smooth.
   const SH = -L.torso;
   const softKnees = { pl: 6, sl: -6, pr: 6, sr: -6 };
-  const hang = { aL: [-9, 0], aR: [9, 0], bL: -1, bR: 1 };
   // 0 at the start of a cycle, 1 halfway, 0 again at the end: one smooth swing.
   const swing = (phase) => (1 - Math.cos(phase * 2 * Math.PI)) / 2;
   // 0 below `from`, 1 above `to`, smooth between.
   const ramp = (x, from, to) => { const k = clamp((x - from) / (to - from), 0, 1); return k * k * (3 - 2 * k); };
-  // A smooth curve through three values, at 0, 1/2 and 1.
-  const through = (k, y0, y1, y2) => y0 * 2 * (k - 0.5) * (k - 1) - y1 * 4 * k * (k - 1) + y2 * 2 * k * (k - 0.5);
 
   // A body wave, side on: from a shallow squat with the arms swung behind,
   // rising as the arms swing forward and up overhead, then back down into
@@ -262,32 +289,41 @@
     return { t: 2, ul: a, fl: a, ur: b, fr: b, ...softKnees };
   };
 
-  // Big circles from the shoulder with straight arms, both arms together,
-  // seen from three-quarters on so that both show. `dir` 1 forward, -1 back.
+  // Big circles, both arms together: straight arms sweep up along the
+  // sides until the hands meet overhead, then the elbows bend and the hands
+  // come down in front of the chest, and out to the sides again. `dir` 1
+  // forward (up the sides, down the front), -1 backward (the reverse).
   const bigCircles = (dir) => {
-    const cph = Math.cos(rad(QUARTER)), sph = Math.sin(rad(QUARTER));
-    const span = L.upper + L.fore;
-    const ovals = [[-L.shoulder * cph, SH, span * sph, span], [L.shoulder * cph, SH, span * sph, span]];
-    return (phase) => {
-      const a = 180 - dir * 360 * phase;
-      return { uls: a, fls: a, urs: a, frs: a, pls: 5, sls: -5, prs: 5, srs: -5, orbits: ovals };
-    };
+    const keys = [
+      [0, 0], [-45, -45], [-90, -90], [-135, -135], [-180, -180], [-140, 104], [-100, 75], [-45, 53],
+    ].map(([u, f]) => ({ ul: u, fl: f, ur: -u, fr: -f, ...softKnees }));
+    const run = cycle(keys, true);
+    return (phase) => run(dir * phase);
   };
 
-  // The whole body turns like a pendulum. Turned to one side, that side's
-  // arm is straight up and back, the other arm is bent with its hand at the
-  // chest, and the far foot is up on its toes with the knee turned in while
-  // the near foot stays flat. The raised arm swings down in front on the
-  // way to the other side.
+  // Both arms swing together from side to side like a club, the whole body
+  // turning with them. Near the top of each swing the trailing arm's upper
+  // arm stops and its forearm folds up, so the hand rests at the chest
+  // while the leading arm is straight up and back. The feet stay planted:
+  // the far foot rises onto its toes with the knee turned in, the near foot
+  // stays flat, and the hips keep their height.
   const golf = (phase) => {
-    const k = swing(phase);
-    const ul = through(k, -160, -10, 40), ur = -through(1 - k, -160, -10, 40);
-    const bl = ramp(k, 0.5, 1), br = ramp(k, 0.5, 0);
+    const c = Math.cos(phase * 2 * Math.PI);
+    const th = -160 * c;
+    const trail = (x) => 20 + 20 * Math.tanh((x - 20) / 20);
+    const ul = th <= 20 ? th : trail(th), ur = th >= -20 ? th : -trail(-th);
+    const turnHips = 28 * c, hw = L.hip * Math.cos(rad(turnHips));
+    const foot = (b, side) => {
+      const ft = side * (90 - 105 * b), len = 7 - 3 * b;
+      const ankle = [side * 11, 40.6 - len * Math.cos(rad(ft))];
+      const [thigh, shin] = legTo([side * hw, 0], ankle, -side);
+      return { thigh, shin, ft, len };
+    };
+    const lf = foot(ramp(th, 60, 160), -1), rf = foot(ramp(-th, 60, 160), 1);
     return {
-      turn: 45 * (1 - 2 * k), turnHips: 28 * (1 - 2 * k),
-      ul, fl: ul + 120 * ramp(k, 0.55, 1), ur, fr: ur - 120 * ramp(k, 0.45, 0),
-      pl: -8 + 32 * bl, sl: 8 - 37 * bl, ftl: -90 + 105 * bl, footl: 7 - 3 * bl,
-      pr: 8 - 32 * br, sr: -8 + 37 * br, ftr: 90 - 105 * br, footr: 7 - 3 * br,
+      turn: 45 * c, turnHips, ul, fl: th, ur, fr: th,
+      pl: lf.thigh, sl: lf.shin, ftl: lf.ft, footl: lf.len,
+      pr: rf.thigh, sr: rf.shin, ftr: rf.ft, footr: rf.len,
     };
   };
 
@@ -296,8 +332,8 @@
   // swing across to the hip on one side and behind on the other.
   const twist = (phase) => {
     const th = phase * 2 * Math.PI, s = Math.sin(th);
-    const u = 42 * Math.sin(th - 0.45), f = 50 * Math.sin(th - 0.95);
-    return { turn: 55 * s, turnHips: 40 * s, ul: u, fl: f, ur: u, fr: f, far: s > 0.25 ? ['ra'] : s < -0.25 ? ['la'] : [] };
+    const u = 42 * Math.sin(th - 0.45), f = 46 * Math.sin(th - 0.6);
+    return { turn: 55 * s, turnHips: 40 * s, ul: u, fl: f + 7, ur: u, fr: f - 7, far: s > 0.25 ? ['ra'] : s < -0.25 ? ['la'] : [] };
   };
 
   // The rope passes under the feet while the body is up, and over the head
@@ -314,13 +350,13 @@
   // Marching, three-quarters on: a knee up to a right angle with both hands
   // meeting on top of it, then a beat with both feet down and the forearms
   // out to the sides, then the other knee.
-  const marchLean = { t: 16, h: 10 };
+  const marchLean = { t: 4, h: 2 };
   const marchOut = { ...marchLean, pls: 0, pll: 0, sls: 0, ftls: 90, prs: 0, prl: 0, srs: 0, ftrs: 90,
     tL: [-19, 11, 11], tR: [19, 11, 11], pL: [0, 0, -1], pR: [0, 0, -1] };
   const marchKnee = (side) => ({ ...marchLean,
-    pls: side < 0 ? 100 : 0, pll: side < 0 ? 4 : 0, sls: side < 0 ? 8 : 0, ftls: side < 0 ? 50 : 90,
-    prs: side > 0 ? 100 : 0, prl: side > 0 ? 4 : 0, srs: side > 0 ? 8 : 0, ftrs: side > 0 ? 50 : 90,
-    tL: [side * 6.35 - 1.85, 19, 6], tR: [side * 6.35 + 1.85, 19, 6], pL: [-0.4, -0.2, -1], pR: [0.4, -0.2, -1] });
+    pls: side < 0 ? 105 : 0, pll: side < 0 ? 4 : 0, sls: side < 0 ? 8 : 0, ftls: side < 0 ? 50 : 90,
+    prs: side > 0 ? 105 : 0, prl: side > 0 ? 4 : 0, srs: side > 0 ? 8 : 0, ftrs: side > 0 ? 50 : 90,
+    tL: [side * 6.5 - 1.85, 19, 8.5], tR: [side * 6.5 + 1.85, 19, 8.5], pL: [-0.4, -0.2, -1], pR: [0.4, -0.2, -1] });
 
   const MOVES = {
     'Lymphatic hops': { view: 'side', period: 0.55, stills: [0, 0.5], pose: cycle([
@@ -332,16 +368,15 @@
 
     'Arm swings': { view: 'side', period: 1.2, stills: [0, 0.5], pose: armSwings },
 
-    // Hands laced together in front, a hoop that turns with the trunk, on
-    // soft knees.
-    'Trunk twists': { view: 'front', period: 1.4, stills: [0, 0.25, 0.5], pose: cycle([
-      { turn: 58, aL: [-19, -13], aR: [-19, -13], bL: -1, bR: 1, ...softKnees },
-      { turn: 0, aL: [0, -9], aR: [0, -9], bL: -1, bR: 1, ...softKnees },
-      { turn: 58, aL: [19, -13], aR: [19, -13], bL: -1, bR: 1, ...softKnees },
-      { turn: 0, aL: [0, -9], aR: [0, -9], bL: -1, bR: 1, ...softKnees },
-    ]) },
+    // Hands laced together in front, a hoop that turns with the trunk in
+    // one continuous sway, on soft knees.
+    'Trunk twists': { view: 'front', period: 1.6, stills: [0, 0.25, 0.5], pose: (phase) => {
+      const s = Math.sin(phase * 2 * Math.PI);
+      const hands = [19 * s, -9 - 4 * Math.abs(s)];
+      return { turn: 58 * s, aL: hands, aR: hands, bL: -1, bR: 1, ...softKnees };
+    } },
 
-    'Forward arm circles': { view: 'quarter', period: 1.8, stills: [0, 0.25, 0.5], pose: bigCircles(1) },
+    'Forward arm circles': { view: 'front', period: 2.2, stills: [0.25, 0.5, 0.75], pose: bigCircles(1) },
 
     // Hinged forward, short of flat, so the back stays supported.
     'Bent over back shakes': { view: 'side', period: 0.5, stills: [0, 0.5], pose: cycle([
@@ -349,50 +384,63 @@
       { t: 70, h: 94, pl: 19, sl: -19, pr: 19, sr: -19, ul: -6, fl: -4, ur: -6, fr: -4 },
     ]) },
 
-    'Backward arm circles': { view: 'quarter', period: 1.8, stills: [0, 0.25, 0.5], pose: bigCircles(-1) },
+    'Backward arm circles': { view: 'front', period: 2.2, stills: [0.25, 0.5, 0.75], pose: bigCircles(-1) },
 
     // A sway with a light turn: a limp arm swings up so its forearm lands
-    // across the chest, elbow hanging low, while the other arm swings behind.
-    'Dead arms': { view: 'front', period: 1.5, stills: [0, 0.25, 0.5], pose: cycle([
-      { t: -6, h: -4, turn: 30, turnHips: 8, aL: [6, -23], aR: [15, -2], bL: -1, bR: 1, far: ['ra'] },
-      { t: 0, h: 0, turn: 0, turnHips: 0, ...hang, far: [] },
-      { t: 6, h: 4, turn: 30, turnHips: 8, aR: [-6, -23], aL: [-15, -2], bL: -1, bR: 1, far: ['la'] },
-      { t: 0, h: 0, turn: 0, turnHips: 0, ...hang, far: [] },
-    ]) },
+    // across the chest and rests there for a beat, the elbow hanging low,
+    // while the other arm hangs behind; then it drops, and the turn the
+    // other way brings the other arm up.
+    'Dead arms': { view: 'front', period: 3, stills: [0, 1 / 3, 0.5], pose: (() => {
+      const left = { t: -5, h: -3, turn: 25, turnHips: 6, ul: 25, fl: 150, ur: 14, fr: 10, far: ['ra'] };
+      const right = { t: 5, h: 3, turn: 25, turnHips: 6, ur: -25, fr: -150, ul: -14, fl: -10, far: ['la'] };
+      const down = { t: 0, h: 0, turn: 0, turnHips: 0, ul: -4, fl: -4, ur: 4, fr: 4, far: [] };
+      return cycle([left, left, down, right, right, down]);
+    })() },
 
     'Golf swings': { view: 'front', period: 1.7, stills: [0, 0.25, 0.5], pose: golf },
 
-    // The hands-out pose is held for a beat between knees.
-    'Marches': { view: 'quarter', period: 2.7, stills: [0, 1 / 6], pose: cycle([marchKnee(1), marchOut, marchOut, marchKnee(-1), marchOut, marchOut]) },
+    'Marches': { view: 'quarter', period: 2, stills: [0, 0.25], pose: cycle([marchKnee(1), marchOut, marchKnee(-1), marchOut]) },
 
     'Tiptoe body waves': { view: 'side', period: 2.4, stills: [0, 0.25, 0.5], pose: wave(true) },
 
-    'Twist the waist': { view: 'front', period: 1.5, stills: [0, 0.25, 0.5], pose: twist },
+    'Twist the waist': { view: 'front', period: 1.8, stills: [0, 0.25, 0.5], pose: twist },
 
-    // Feet flat and turned out; the arms sweep out and up at the sides on the
-    // way up, and back down the same way.
-    'Ballet squats': { view: 'front', period: 2, stills: [0, 0.5], pose: cycle([
-      { pl: -20, sl: -12, pr: 20, sr: 12, ftl: -85, ftr: 85, ul: -160, fl: -168, ur: 160, fr: 168 },
-      { pl: -52, sl: 14.8, pr: 52, sr: -14.8, ftl: -85, ftr: 85, ul: -28, fl: -22, ur: 28, fr: 22 },
-    ]) },
+    // Feet flat and turned out. Down in the squat the hands meet low in
+    // front; the arms sweep out and up along the sides as the legs
+    // straighten, until the hands meet overhead, and back down the same way.
+    'Ballet squats': { view: 'front', period: 2.8, stills: [0, 0.5], pose: (() => {
+      const legs = (d) => ({ pl: -20 - 32 * d, sl: -12 + 26.8 * d, pr: 20 + 32 * d, sr: 12 - 26.8 * d, ftl: -85, ftr: 85 });
+      const arms = (u, f) => ({ ul: u, fl: f, ur: -u, fr: -f });
+      const top = { ...legs(0), ...arms(-165, 140) }, v = { ...legs(0.15), ...arms(-135, -135) };
+      const t = { ...legs(0.4), ...arms(-90, -90) }, low = { ...legs(0.7), ...arms(-45, -45) };
+      const squat = { ...legs(1), ...arms(10, 15) };
+      return cycle([top, v, t, low, squat, squat, low, t, v], true);
+    })() },
 
     // Straight arms open wide as one foot steps back behind the other and the
-    // body turns a little; back to the middle for a clap.
-    'Wide arm step backs': { view: 'front', period: 2.6, stills: [0, 0.25], pose: cycle([
-      { aL: [0, -18], aR: [0, -18], bL: -1, bR: 1, far: [], turn: 0, turnHips: 0, t: 0 },
-      { aL: [-33.9, -27], aR: [33.9, -27], bL: -1, bR: 1, far: ['rl'], turn: 18, turnHips: 10, t: -3, pr: -25, sr: -20, ftr: 60 },
-      { aL: [0, -18], aR: [0, -18], bL: -1, bR: 1, far: [], turn: 0, turnHips: 0, t: 0 },
-      { aL: [-33.9, -27], aR: [33.9, -27], bL: -1, bR: 1, far: ['ll'], turn: 18, turnHips: 10, t: 3, pl: 25, sl: 20, ftl: -60 },
-    ]) },
+    // body turns a little; back to the middle, the straight arms come
+    // together in front at shoulder height for a clap, foreshortened.
+    'Wide arm step backs': { view: 'front', period: 2.6, stills: [0, 0.25], pose: (() => {
+      const clap = { sL: [-1, -23], sR: [1, -23], far: [], turn: 0, turnHips: 0, t: 0, pl: 0, sl: 0, ftl: -90, pr: 0, sr: 0, ftr: 90 };
+      const open = (side) => ({ sL: [-34, -27], sR: [34, -27], far: [side > 0 ? 'rl' : 'll'], turn: 18, turnHips: 10, t: -3 * side,
+        pl: side < 0 ? 25 : 0, sl: side < 0 ? 20 : 0, ftl: side < 0 ? -60 : -90,
+        pr: side > 0 ? -25 : 0, sr: side > 0 ? -20 : 0, ftr: side > 0 ? 60 : 90 });
+      return cycle([clap, open(1), clap, open(-1)]);
+    })() },
 
-    // One motion: the leg steps back into a light lunge as both arms rise
-    // overhead, and everything returns to the middle together.
-    'Backstep wave lunges': { view: 'side', period: 2.8, stills: [0, 0.25], pose: cycle([
-      { t: 3, h: 6, ul: 10, fl: 16, ur: 10, fr: 16 },
-      { t: -4, h: -8, pr: -38, sr: -38, ftr: 40, pl: 40, sl: -5, ul: 172, fl: 178, ur: 172, fr: 178 },
-      { t: 3, h: 6, ul: 10, fl: 16, ur: 10, fr: 16 },
-      { t: -4, h: -8, pl: -38, sl: -38, ftl: 40, pr: 40, sr: -5, ul: 172, fl: 178, ur: 172, fr: 178 },
-    ]) },
+    // One motion: the foot lifts and travels back into a light lunge as
+    // both arms rise overhead, then lifts and comes forward again as they
+    // come down. Then the other leg.
+    'Backstep wave lunges': { view: 'side', period: 3.2, stills: [0, 0.25], pose: (() => {
+      const stand = { t: 3, h: 6, ul: 10, fl: 16, ur: 10, fr: 16, pl: 0, sl: 0, ftl: 90, pr: 0, sr: 0, ftr: 90 };
+      const step = (side) => ({ t: 0, h: 0, ul: 90, fl: 96, ur: 90, fr: 96,
+        pl: side < 0 ? -25 : 0, sl: side < 0 ? 35 : 0, ftl: side < 0 ? 60 : 90,
+        pr: side > 0 ? -25 : 0, sr: side > 0 ? 35 : 0, ftr: side > 0 ? 60 : 90 });
+      const lunge = (side) => ({ t: -4, h: -8, ul: 172, fl: 178, ur: 172, fr: 178,
+        pl: side < 0 ? -38 : 40, sl: side < 0 ? -38 : -5, ftl: side < 0 ? 40 : 90,
+        pr: side > 0 ? -38 : 40, sr: side > 0 ? -38 : -5, ftr: side > 0 ? 40 : 90 });
+      return cycle([stand, step(1), lunge(1), step(1), stand, step(-1), lunge(-1), step(-1)]);
+    })() },
 
     'Pushups': { view: 'side', period: 1.6, stills: [0, 0.5], pose: cycle([
       { t: 72, h: 95, pl: -72, sl: -72, pr: -72, sr: -72, ftl: 0, ftr: 0, aL: [24.7, 19], aR: [24.7, 19], bL: -1, bR: -1, floor: true, dx: 8 },
