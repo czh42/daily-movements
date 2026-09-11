@@ -40,8 +40,9 @@ begin.
 Every move in the list carries a small circled i at the end of its row.
 Press it, or rest the pointer on it, for that move's note: a storyboard
 of two or three stills, a sentence on how the move goes, and a line to
-keep in mind. A press pins the note open; a press anywhere else, or
-Escape, closes it.
+keep in mind. It opens below the mark when the window has room for it
+there, and above the mark otherwise. A press pins the note open; a
+press anywhere else, or Escape, closes it.
 
 During a session:
 

@@ -490,8 +490,9 @@
   .name .info { margin: 0; }
   .name .info svg { width: 1.2rem; height: 1.2rem; }
 
-  /* The note: a small card below the mark, with a storyboard of the move
-     and a few words on how it goes and what to keep in mind. */
+  /* The note: a small card below the mark (above it, near the bottom of
+     the window), with a storyboard of the move and a few words on how it
+     goes and what to keep in mind. */
   .note {
     position: absolute;
     z-index: 5;
@@ -795,55 +796,55 @@
   const NOTES = {
     'Lymphatic hops': [
       'Bounce lightly in place with soft knees, so that the feet barely leave the floor, and let the arms hang loose.',
-      'Keep the bounce small. If hopping bothers your knees, rise onto your toes and drop your heels instead.'],
+      'If hopping bothers your knees, rise onto your toes and drop your heels instead.'],
     'Body waves': [
       'Start in a shallow squat with the arms swung behind you. Rise as the arms swing forward and up overhead, then sink back into the squat as they swing down and behind you, so that the whole thing is one continuous wave.',
       'Keep the eyes forward and the head quiet, so that you don\'t get dizzy.'],
     'Arm swings': [
-      'Swing one arm forward and up until the hand is above your head while the other arm swings down and a little behind you, then let them change places. The arms swing in front of you and stay straight.',
+      'Swing one arm forward and up until the hand is above your head while the other swings down and a little behind you, then let them change places. The arms stay straight and pass in front of you.',
       'Let the swing carry the arms, and keep the shoulders down and relaxed.'],
     'Trunk twists': [
       'Stand with the knees slightly bent and loose, lean a little forward, and lace the fingers together in front of the chest. Turn the upper body from side to side, so that the joined arms travel with it like a hoop.',
       'The hips and feet stay still, and only the trunk turns. A moderate turn is enough.'],
     'Forward arm circles': [
-      'Sweep both straight arms up along your sides until the hands meet above your head, then bring them down in front of you, still straight, and swing them back to your sides to begin the next circle.',
-      'Keep the arms loose rather than tense, and lower them for a moment if the shoulders start to burn.'],
+      'Sweep both arms up along your sides until the hands meet above your head, then bring them down in front of you and back to your sides to begin the next circle. The arms stay straight the whole way round.',
+      'Keep the shoulders loose, and lower the arms for a moment if they start to burn.'],
     'Bent over back shakes': [
       'Keep the back straight and lean a little forward over bent knees, as if hovering. Let the head and arms hang loosely, and bounce gently from the knees.',
       'This can tire the lower back. Do less of it if your back is fragile, and come up slowly.'],
     'Backward arm circles': [
-      'Draw the same circle the other way. The straight arms rise in front of you until the hands meet above your head, then sweep back down along your sides.',
-      'Keep the circles loose. These feel harder than the forward ones.'],
+      'Draw the same circle the other way. The straight arms rise in front of you until the hands meet above your head, then sweep down along your sides.',
+      'These feel harder than the forward ones, so keep the arms loose.'],
     'Dead arms': [
-      'Shake the arms loose, then turn the upper body from side to side in one continuous motion, much like Twist the waist. With each turn a limp arm swings up so that its forearm flops across the chest while the other arm swings behind you, and the turn back brings the other arm up.',
+      'Let the arms go completely limp and turn the upper body from side to side, much like Twist the waist. With each turn one arm swings up and its forearm flops across the chest, while the other swings behind you.',
       'The body moves the arms, not the other way round.'],
     'Golf swings': [
-      'Swing both arms together from one side to the other like a pendulum, turning the whole body with them. At the top of each swing the arm on that side is straight up and back, the other arm is bent with its hand resting at the chest, and the foot on the far side has pivoted onto its toes while the near foot stays flat, making one line from that toe to the raised hand. The arms then swing down in front of you, and their momentum carries you round to the other side.',
-      'Turn the whole body, so that the knees are never twisted, and keep the swing smooth rather than flung.'],
+      'Swing both arms together from side to side as if holding a golf club, turning the whole body with them. At the top of each swing the foot you are turning away from pivots onto its toes, so that one line runs from that toe up to the raised hand.',
+      'Let the knees turn with you so that they never twist, and keep the swing smooth rather than flung.'],
     'Marches': [
-      'March in place with the body tall, the elbows bent, and the forearms out to the sides. As one knee rises to a right angle, both hands come in to meet on top of it. Then the hands open out again while both feet are on the floor, and the other knee comes up.',
+      'March in place with the elbows bent and the hands out to the sides. As each knee rises to a right angle, both hands come in to meet on top of it, then open out again as the foot comes down.',
       'A slight forward lean helps with balance. Start slowly.'],
     'Tiptoe body waves': [
       'This is the same wave as Body waves, with a rise onto the toes as the arms reach the top. The heels come down as the arms swing down and behind you.',
       'The calves tire quickly here. Slowing down is fine.'],
     'Twist the waist': [
-      'Stand tall and turn from side to side at the waist with the arms completely loose, letting the feet pivot with you. As you turn to the right, the left arm swings across to the right hip and the right arm swings behind you, and the turn to the left brings them back the other way.',
+      'Stand tall and turn from side to side at the waist, letting the feet pivot with you. The arms swing with each turn, one across the body to the opposite hip and the other behind you.',
       'Let the arms go completely loose, so that the turn swings them rather than the arms doing the work.'],
     'Ballet squats': [
-      'Stand with the feet wider than the shoulders, flat on the floor, and the toes turned out. Sink into a squat as the arms sweep down along your sides until the forearms cross in front of you, then rise straight back up as the arms sweep out and up until the hands meet above your head, drawing one flowing circle around you.',
-      'Keep the back tall and the chest up, rather than folding forward at the hips.'],
+      'Stand with the feet wider than the shoulders and the toes turned out. Sink into a squat as the arms sweep down along your sides and cross in front of you, then rise as they sweep out and up until the hands meet above your head.',
+      'The feet stay flat on the floor. Keep the chest up rather than folding forward at the hips.'],
     'Wide arm step backs': [
-      'Open the arms wide and straight as one foot steps back behind the other, letting the body turn a little. Step back to the middle and bring the straight arms together in front of you at shoulder height for a clap, then step the other foot back as the arms open again.',
-      'Slow it down until the balance is there.'],
+      'Open the arms wide as one foot steps back behind the other, letting the body turn a little. Come back to the middle and clap in front of you at shoulder height, then step the other foot back as the arms open again.',
+      'Keep the arms straight, and slow it down until the balance is there.'],
     'Backstep wave lunges': [
-      'Swing both straight arms forward and up while one leg travels back into a light lunge, so that the stretch runs from the fingertips to the back foot. The front foot stays where it is and only its knee bends. Bring the arms down in front of you as the back leg comes forward, and let the other leg set off as it lands, so that one lunge flows into the next.',
-      'Dropping the back knee is optional. Go gently if your back is sore.'],
+      'Swing both arms forward and up as one leg steps back into a light lunge, so that the stretch runs from the fingertips to the back foot. Bring the arms down as that leg comes forward, and let the other leg set off as it lands.',
+      'The front foot stays put and only its knee bends. Go gently if your back is sore.'],
     'Pushups': [
       'Do any kind that lets you keep going: on the floor, on the knees, or with the hands on a couch or a wall.',
       'Rest whenever you need to, and keep a straight line from head to heels.'],
     'Jump rope': [
       'Jump in place, with a rope or without one, keeping the elbows loosely bent at your sides and turning the rope with the hands out from the body.',
-      'Keep the jumps small and quick, on the balls of the feet. Jumping without a rope counts.'],
+      'Keep the jumps small and quick, on the balls of the feet.'],
   };
 
 
@@ -1377,15 +1378,25 @@
     el.noteMindBox.hidden = !mind;
   }
 
-  // Below the mark, kept within the page's side margins.
+  // Below the mark when the window has room for it there, above the mark
+  // otherwise, and if neither fits, as near to the mark as the window
+  // allows, so that the whole card can be read. Kept within the page's
+  // side margins.
   function placeNote(btn) {
     const r = btn.getBoundingClientRect();
     const pad = parseFloat(getComputedStyle(document.body).paddingLeft) || 16;
+    const gap = 8;
+    const vw = document.documentElement.clientWidth;
+    const vh = window.innerHeight;
     const width = el.note.offsetWidth;
-    const maxLeft = document.documentElement.clientWidth - width - pad;
-    const left = Math.max(pad, Math.min(r.left, maxLeft)) + window.scrollX;
-    el.note.style.left = `${Math.round(left)}px`;
-    el.note.style.top = `${Math.round(r.bottom + window.scrollY + 8)}px`;
+    const height = el.note.offsetHeight;
+    const left = Math.max(pad, Math.min(r.left, vw - width - pad));
+    let top;
+    if (r.bottom + gap + height <= vh - gap) top = r.bottom + gap;
+    else if (r.top - gap - height >= gap) top = r.top - gap - height;
+    else top = Math.max(gap, Math.min(r.bottom + gap, vh - gap - height));
+    el.note.style.left = `${Math.round(left + window.scrollX)}px`;
+    el.note.style.top = `${Math.round(top + window.scrollY)}px`;
   }
 
   function openNote(btn, pinned) {
