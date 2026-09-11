@@ -47,10 +47,15 @@ During a session:
 
 - A line figure of the move runs beside the count, repeating the
   movement for as long as the exercise lasts. During "Get ready" and
-  each rest it shows the move coming next, paler. It freezes with a
-  pause. If the system asks for reduced motion it holds one still
-  instead.
-- The same circled i sits beside the move's name and opens its note.
+  each rest there is no figure and no mark: those moments are for
+  settling and resting, not for the next move. The figure's place is
+  kept, so nothing shifts when it appears. It freezes with a pause. If
+  the system asks for reduced motion it holds one still instead.
+- The same circled i sits beside the move's name, a little apart from
+  it, and opens its note.
+- The move's name always sits on one line. Its size is fitted once the
+  fonts are in, so that the longest name and the mark after it fit the
+  line, and every move uses that same size.
 - **Pause** / **Resume**, or press the space bar.
 - **Skip** moves to the next exercise or rest, or press the right arrow.
 - **End** asks once more before it stops.
@@ -92,8 +97,10 @@ days.
 ## Changing the exercises
 
 The moves are the `MOVES` list near the top of the script in
-`index.html`, each with its body area. Order matters. Two names follow
-Spencer's list: "Tiptoe arm swings" and "Backstep wave lunges".
+`index.html`, each with its body area. Order matters. Two names are
+adapted from Spencer's list: "Backstep wave lunges" (his "Back step")
+and "Tiptoe body waves" (his "Tiptoe arm swings"; renamed for how the
+move is actually done, a body wave with a rise onto the toes).
 
 The notes are the `NOTES` object right below, keyed by the move's name:
 two strings per move, how it goes and what to keep in mind. The figures

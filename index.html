@@ -487,7 +487,7 @@
   .info:hover, .info[aria-expanded="true"] { color: var(--ink); }
   .info[hidden] { display: none; }
   .list .info { margin-left: 0.25rem; }
-  .name .info { margin-left: 0.1em; vertical-align: 0.12em; }
+  .name .info { margin-left: 0.4em; vertical-align: 0.12em; }
   .name .info svg { width: 1.2rem; height: 1.2rem; }
 
   /* The note: a small card below the mark, with a storyboard of the move
@@ -558,25 +558,28 @@
   .dashes { grid-area: dashes; }
   .session-actions { grid-area: actions; }
   .phase, .next { margin: 0; line-height: 1.5; min-height: 1.5em; }
+  /* The name sits on one line: its size is fitted, once the fonts are
+     in, so the longest name and the mark after it fit the line. */
   .name {
     margin: 0.35rem 0 clamp(1rem, 4vh, 2.5rem);
-    font-size: clamp(2.4rem, 7.5vw, 5rem);
+    font-size: var(--name-size, clamp(2.4rem, 7.5vw, 5rem));
     font-weight: 400;
     letter-spacing: -0.02em;
     line-height: 1.08;
-    max-width: 14ch;
-    min-height: 2.16em;
+    min-height: 1.08em;
+    white-space: nowrap;
   }
   .name.is-rest { font-style: italic; color: var(--muted); }
   .name.is-ready { font-style: italic; }
   .fig {
     width: clamp(8rem, 40vw, 12rem);
     justify-self: end;
-    transition: opacity 400ms ease;
+    transition: opacity 400ms ease, visibility 400ms;
   }
   .fig svg { display: block; width: 100%; height: auto; }
   .fig .fg-far, .fig .fg-near, .fig .fg-body { stroke-width: 1.8; }
-  .fig.is-ahead { opacity: 0.5; }
+  /* Between moves the figure is away but keeps its place. */
+  .fig.is-off { opacity: 0; visibility: hidden; }
   .fig[hidden] { display: none; }
   .count {
     margin: 0;
@@ -653,7 +656,7 @@
     .start.is-open .start-list { max-width: none; }
     .list-head { margin-top: 0.3rem; }
     .session {
-      grid-template-columns: minmax(0, 40rem) auto;
+      grid-template-columns: minmax(0, 44rem) auto;
       grid-template-areas: "phase fig" "name fig" "count fig" "next fig" "dashes ." "actions .";
       column-gap: clamp(2rem, 5vw, 5rem);
     }
@@ -771,7 +774,7 @@
     ['Dead arms', 'spine'],
     ['Golf swings', 'spine'],
     ['Marches', 'hips & legs'],
-    ['Tiptoe arm swings', 'hips & legs'],
+    ['Tiptoe body waves', 'hips & legs'],
     ['Twist the waist', 'spine'],
     ['Ballet squats', 'hips & legs'],
     ['Wide arm step backs', 'hips & legs'],
@@ -790,54 +793,55 @@
       'Bounce lightly in place with soft knees, so the feet barely leave the floor. Let the arms hang loose.',
       'Keep the bounce small. If hopping bothers your knees, rise onto your toes and drop your heels instead.'],
     'Body waves': [
-      'Lift the chest, then round down through the upper, middle, and lower back into a shallow squat. Rise back up as the arms swing overhead.',
+      'From a shallow squat with the arms swung behind you, rise as the arms swing forward and up overhead, then sink back into the squat as they swing down and behind. One continuous wave.',
       'Keep the eyes forward and the head quiet, so you don\'t get dizzy.'],
     'Arm swings': [
-      'Swing the arms loosely forward and back at shoulder height, one arm going forward while the other goes back.',
+      'One arm swings straight up overhead as the other swings back behind you, then they switch. Straight arms, all the way up.',
       'Let the swing carry the arms. Shoulders down and relaxed.'],
     'Trunk twists': [
-      'Feet hip-width apart, lean slightly forward, and turn the upper body from side to side, letting the arms swing across.',
+      'Lean slightly forward, lace the fingers together in front of you, and turn the upper body from side to side, the joined hands held like a hoop in front of the chest.',
       'The hips and feet stay still. Only the trunk turns.'],
     'Forward arm circles': [
-      'Arms out at shoulder height, the hands tracing small circles, moving forward at the top of each circle.',
-      'Small and loose beats big and tense. Lower the arms for a moment if the shoulders burn.'],
+      'Arms straight, big circles from the shoulder, the hands moving forward at the top of each circle.',
+      'Loose beats tense. Lower the arms for a moment if the shoulders burn.'],
     'Bent over back shakes': [
-      'Hinge forward at the hips with the knees slightly bent. Let the head and arms hang, and bounce gently.',
+      'Hinge forward at the hips with the knees slightly bent, stopping short of flat so the back stays supported. Let the head and arms hang, and bounce gently.',
       'This can tire the lower back. Do less of it if your back is fragile, and come up slowly.'],
     'Backward arm circles': [
-      'The same small circles, with the hands moving backward at the top.',
-      'Keep the circles small. These feel harder than the forward ones.'],
+      'The same big circles from the shoulder, with the hands moving backward at the top.',
+      'Keep the arms straight and the circles loose. These feel harder than the forward ones.'],
     'Dead arms': [
-      'Shake the arms loose, then sway the body from side to side so the limp arms swing and slap against you.',
+      'Shake the arms loose, then sway and turn the body gently from side to side, so a limp arm swings up and lands on the chest while the other swings behind you.',
       'The body moves the arms, not the other way round.'],
     'Golf swings': [
-      'Feet shoulder-width apart, hands together. Swing the arms from one side to the other like a pendulum, turning the hips and legs along with them.',
-      'Turn the whole body, so the knees are never twisted, and don\'t fling the arms behind you.'],
+      'Turn to one side: that side\'s arm swings straight up behind you while the other arm bends, its hand coming up to the chest. The back foot pivots onto its ball, making one line from that toe to the raised hand. Then the other side.',
+      'Turn the whole body, so the knees are never twisted, and keep the swing smooth rather than flung.'],
     'Marches': [
-      'March in place, lifting one knee at a time. The opposite hand taps the knee while the other arm swings back.',
+      'March in place with the elbows bent and the hands out from the sides. As one knee rises to a right angle, the hands come in to clap on it. Hands out again, both feet down, then the other knee.',
       'A slight forward lean helps with balance. Start slow.'],
-    'Tiptoe arm swings': [
-      'Swing the arms forward and up as you rise onto your toes, then drop the heels as the arms swing down.',
+    'Tiptoe body waves': [
+      'The same wave as Body waves, rising onto the toes as the arms reach the top. Drop the heels as the arms swing down and behind.',
       'The calves tire quickly here. Slowing down is fine.'],
     'Twist the waist': [
-      'Stand tall and turn from side to side at the waist, the arms fully limp so they wrap around and slap the body. Let the feet pivot with you.',
+      'Stand tall and turn from side to side at the waist with the arms completely loose. Turning right, the left arm swings across to the right hip and the right arm swings behind you; then the other way.',
       'Let the arms go completely loose.'],
     'Ballet squats': [
-      'Feet wider than the shoulders, toes turned out. Sink straight down as the arms swing down, then rise as they swing up.',
+      'Feet wider than the shoulders and flat on the floor, toes turned out. Sink straight down as the arms come down at the sides, then rise as the arms sweep out and up, drawing a circle around you.',
       'Keep the back tall and the chest up, rather than folding forward at the hips.'],
     'Wide arm step backs': [
-      'Step one foot back into a shallow lunge as the arms open wide. Step back to the middle, clap, and switch sides.',
+      'Open the arms wide and straight as one foot steps back behind the other, letting the body turn a little. Step back to the middle and clap with straight arms, then the other side.',
       'Slow it down until the balance is there.'],
     'Backstep wave lunges': [
-      'Step one leg back into a lunge while rolling through a body wave, reaching the hands overhead. Then the other side.',
+      'Step one leg back into a light lunge while both arms rise overhead in one wave, so the stretch runs from the fingertips to the back foot. Come back to the middle together, then the other side.',
       'Dropping the back knee is optional. Go gently if your back is sore.'],
     'Pushups': [
       'Any kind that lets you keep going: on the floor, on the knees, or with the hands on a couch or a wall.',
       'Rest whenever you need to. Keep a straight line from head to heels.'],
     'Jump rope': [
-      'Skip in place, with a rope or without one.',
-      'Small, quick hops on the balls of the feet. Hopping without a rope counts.'],
+      'Jump in place, with a rope or without one. Elbows loosely bent at your sides, the hands turning out from the body.',
+      'Small, quick jumps on the balls of the feet. Jumping without a rope counts.'],
   };
+
 
   // ---------- Settings ----------
   // The original routine always runs at BASE: 60 seconds a move, 15 of
@@ -1156,7 +1160,7 @@
     el.session.hidden = which !== 'session';
     el.finish.hidden = which !== 'finish';
     if (which !== 'session') { html.removeAttribute('data-kind'); html.removeAttribute('data-paused'); }
-    if (which === 'session') figStart(); else figStop();
+    if (which === 'session') { fitNames(); figStart(); } else figStop();
     window.scrollTo(0, 0);
   }
 
@@ -1263,9 +1267,8 @@
     set(el.name, name);
     el.nameBox.classList.toggle('is-rest', seg.kind === 'rest');
     el.nameBox.classList.toggle('is-ready', seg.kind === 'ready');
-    // The mark beside the name opens the note for the move the figure shows:
-    // this one, or the next one during the rest.
-    const shownMove = names[seg.index];
+    // The mark beside the name opens the note for the move under way.
+    const shownMove = seg.kind === 'work' ? names[seg.index] : null;
     el.nameInfo.hidden = !shownMove;
     if (shownMove && el.nameInfo.dataset.name !== shownMove) {
       el.nameInfo.dataset.name = shownMove;
@@ -1287,10 +1290,11 @@
   }
 
   // ---------- The figure ----------
-  // The line figure beside the count: the move under way, or, during the
-  // get-ready count and the rests, the one coming next, paler. Its clock
-  // is the session's, so it freezes with a pause and starts each move at
-  // its first pose. With reduced motion preferred it holds one still.
+  // The line figure beside the count, shown only while a move is under way:
+  // the get-ready count and the rests are left quiet. Its place is kept
+  // throughout, so nothing shifts when it appears. Its clock is the
+  // session's, so it freezes with a pause and starts each move at its
+  // first pose. With reduced motion preferred it holds one still.
   const Fig = window.Figures || null;
   const stillMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let figParts = null, figRaf = null, figLast = '';
@@ -1303,13 +1307,14 @@
       svg.setAttribute('focusable', 'false');
       figParts = Fig.make(svg);
       el.fig.appendChild(svg);
+      el.fig.hidden = false;
     }
     const s = elapsed() / 1000;
     const seg = segmentAt(s);
-    const name = names[seg.index];
-    if (!name || !Fig.has(name)) { el.fig.hidden = true; return; }
-    el.fig.hidden = false;
-    el.fig.classList.toggle('is-ahead', seg.kind !== 'work');
+    const name = seg.kind === 'work' ? names[seg.index] : null;
+    const on = Boolean(name && Fig.has(name));
+    el.fig.classList.toggle('is-off', !on);
+    if (!on) return;
     const stills = Fig.stills(name);
     const phase = stillMotion.matches
       ? stills[Math.min(1, stills.length - 1)]
@@ -1320,6 +1325,31 @@
     Fig.draw(figParts, Fig.pose(name, phase));
   }
   function figLoop() { figFrame(); figRaf = requestAnimationFrame(figLoop); }
+
+  // The name's size: the largest at which every name, with the mark after
+  // it, fits its line. The same size for every move, so nothing changes
+  // from one to the next.
+  const probe = document.createElement('span');
+  probe.style.cssText = 'position:absolute;top:-999px;left:0;visibility:hidden;white-space:nowrap;font:400 100px/1 var(--font-garden);letter-spacing:-0.02em';
+  document.body.appendChild(probe);
+  function fitNames() {
+    if (state.screen !== 'session') return;
+    const rem = parseFloat(getComputedStyle(html).fontSize) || 16;
+    let longest = 0;
+    for (const word of [...MOVES.map((m) => m[0]), 'Get ready', 'Rest']) {
+      probe.textContent = word;
+      longest = Math.max(longest, probe.offsetWidth / 100);
+    }
+    const width = el.nameBox.clientWidth;
+    if (!width || !longest) return;
+    const size = Math.max(1.5 * rem, Math.min(5 * rem, (width - 1.75 * rem - 2) / (longest + 0.4)));
+    el.session.style.setProperty('--name-size', `${Math.floor(size * 10) / 10}px`);
+  }
+  if (document.fonts) {
+    if (document.fonts.ready) document.fonts.ready.then(fitNames);
+    document.fonts.addEventListener('loadingdone', fitNames);
+  }
+  window.addEventListener('resize', fitNames);
   function figStart() { if (!figRaf && Fig) figRaf = requestAnimationFrame(figLoop); }
   function figStop() { if (figRaf) cancelAnimationFrame(figRaf); figRaf = null; }
 
