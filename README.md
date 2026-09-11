@@ -103,14 +103,18 @@ and "Tiptoe body waves" (his "Tiptoe arm swings"; renamed for how the
 move is actually done, a body wave with a rise onto the toes).
 
 The notes are the `NOTES` object right below, keyed by the move's name:
-two strings per move, how it goes and what to keep in mind. The figures
-live in `figures.js`, keyed by name as well. Each is a view (side or
-front), a period in seconds, the phases to show as stills, and either a
-list of key poses that are cycled through or a function of the phase.
-A pose is a set of joint angles: limbs are measured from straight down,
-the torso and head from straight up, all positive toward the right. A
-hand can instead be given a point to reach for. A move with no figure
-simply shows none.
+two strings per move, how it goes and what to keep in mind, written as
+full sentences. The figures live in `figures.js`, keyed by name as
+well. Each is a view, a period in seconds, the phases to show as
+stills, and either a list of key poses that are cycled through or a
+function of the phase. There are three views. Side on and front on, a
+pose is a set of joint angles: limbs are measured from straight down,
+the torso and head from straight up, all positive toward the right, and
+a hand can instead be given a point to reach for. Three-quarters on,
+each limb is placed by two angles, one in the plane of walking and one
+out to the side, so that a movement forward and a movement sideways
+both show; that view is used where both matter, as in the arm circles
+and the marches. A move with no figure simply shows none.
 
 ## Design notes
 
@@ -141,6 +145,10 @@ change can be checked against them:
 - The figure is a reference, not a performance: hairlines in ink, the
   far limbs paler, the head a dot, a ground line under the feet. It
   keeps its place through every phase and never pushes the text around.
+- The drawings follow how the moves are actually done here, not a
+  generic version: the wave is continuous, the golf swing is a pendulum
+  of the whole body, the marches have a beat between knees, the rope
+  passes under the feet while the body is in the air.
 - Rows in the list are the same size on a phone and a laptop; the body
   area tags hide on phones so every row stays one line.
 

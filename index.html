@@ -487,7 +487,7 @@
   .info:hover, .info[aria-expanded="true"] { color: var(--ink); }
   .info[hidden] { display: none; }
   .list .info { margin-left: 0.25rem; }
-  .name .info { margin-left: 0.4em; vertical-align: 0.12em; }
+  .name .info { margin: 0; }
   .name .info svg { width: 1.2rem; height: 1.2rem; }
 
   /* The note: a small card below the mark, with a storyboard of the move
@@ -535,6 +535,7 @@
   .fg-head { fill: var(--ink); }
   .fg-extra { fill: none; stroke: var(--oak); stroke-width: 0.9; stroke-dasharray: 1.4 1.6; }
   .fg-rope { fill: none; stroke: var(--oak); stroke-width: 1; }
+  .fg-rope-front { stroke: var(--muted); }
 
   /* Session. Every line keeps its height whether or not it has text,
      so nothing below it moves when the phase changes. The figure sits
@@ -561,6 +562,9 @@
   /* The name sits on one line: its size is fitted, once the fonts are
      in, so the longest name and the mark after it fit the line. */
   .name {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
     margin: 0.35rem 0 clamp(1rem, 4vh, 2.5rem);
     font-size: var(--name-size, clamp(2.4rem, 7.5vw, 5rem));
     font-weight: 400;
@@ -790,57 +794,58 @@
   // guidance lives on his site. The drawings are in figures.js.
   const NOTES = {
     'Lymphatic hops': [
-      'Bounce lightly in place with soft knees, so the feet barely leave the floor. Let the arms hang loose.',
+      'Bounce lightly in place with soft knees, so that the feet barely leave the floor, and let the arms hang loose.',
       'Keep the bounce small. If hopping bothers your knees, rise onto your toes and drop your heels instead.'],
     'Body waves': [
-      'From a shallow squat with the arms swung behind you, rise as the arms swing forward and up overhead, then sink back into the squat as they swing down and behind. One continuous wave.',
-      'Keep the eyes forward and the head quiet, so you don\'t get dizzy.'],
+      'Start in a shallow squat with the arms swung behind you. Rise as the arms swing forward and up overhead, then sink back into the squat as they swing down and behind you, so that the whole thing is one continuous wave.',
+      'Keep the eyes forward and the head quiet, so that you don\'t get dizzy.'],
     'Arm swings': [
-      'One arm swings straight up overhead as the other swings back behind you, then they switch. Straight arms, all the way up.',
-      'Let the swing carry the arms. Shoulders down and relaxed.'],
+      'Swing one arm forward and up until the hand is above your head while the other arm swings down and a little behind you, then let them change places. The arms swing in front of you and stay straight.',
+      'Let the swing carry the arms, and keep the shoulders down and relaxed.'],
     'Trunk twists': [
-      'Lean slightly forward, lace the fingers together in front of you, and turn the upper body from side to side, the joined hands held like a hoop in front of the chest.',
-      'The hips and feet stay still. Only the trunk turns.'],
+      'Stand with the knees slightly bent and loose, lean a little forward, and lace the fingers together in front of the chest. Turn the upper body from side to side, so that the joined arms travel with it like a hoop.',
+      'The hips and feet stay still, and only the trunk turns. A moderate turn is enough.'],
     'Forward arm circles': [
-      'Arms straight, big circles from the shoulder, the hands moving forward at the top of each circle.',
-      'Loose beats tense. Lower the arms for a moment if the shoulders burn.'],
+      'Keep the arms straight and draw big circles from the shoulder, with both arms moving together and the hands moving forward as they pass over the top.',
+      'Keep the arms loose rather than tense, and lower them for a moment if the shoulders start to burn.'],
     'Bent over back shakes': [
-      'Hinge forward at the hips with the knees slightly bent, stopping short of flat so the back stays supported. Let the head and arms hang, and bounce gently.',
+      'Hinge forward at the hips with the knees slightly bent, stopping short of flat so that the back stays supported. Let the head and arms hang, and bounce gently.',
       'This can tire the lower back. Do less of it if your back is fragile, and come up slowly.'],
     'Backward arm circles': [
-      'The same big circles from the shoulder, with the hands moving backward at the top.',
+      'Draw the same big circles from the shoulder with straight arms, with the hands moving backward as they pass over the top.',
       'Keep the arms straight and the circles loose. These feel harder than the forward ones.'],
     'Dead arms': [
-      'Shake the arms loose, then sway and turn the body gently from side to side, so a limp arm swings up and lands on the chest while the other swings behind you.',
+      'Shake the arms loose, then sway and turn the body gently from side to side. With each turn a limp arm swings up so that the forearm lands across the chest, while the other arm swings behind you.',
       'The body moves the arms, not the other way round.'],
     'Golf swings': [
-      'Turn to one side: that side\'s arm swings straight up behind you while the other arm bends, its hand coming up to the chest. The back foot pivots onto its ball, making one line from that toe to the raised hand. Then the other side.',
-      'Turn the whole body, so the knees are never twisted, and keep the swing smooth rather than flung.'],
+      'Turn the whole body to one side like a pendulum. The arm on that side swings straight up and back, the other arm bends so that its hand rests at the chest, and the foot on the far side pivots onto its toes while the near foot stays flat, making one line from that toe to the raised hand. The raised arm then swings down in front of you, and its momentum carries you round to the other side.',
+      'Turn the whole body, so that the knees are never twisted, and keep the swing smooth rather than flung.'],
     'Marches': [
-      'March in place with the elbows bent and the hands out from the sides. As one knee rises to a right angle, the hands come in to clap on it. Hands out again, both feet down, then the other knee.',
-      'A slight forward lean helps with balance. Start slow.'],
+      'March in place with the elbows bent and the forearms out to the sides. As one knee rises to a right angle, both hands come in to meet on top of it. Then the hands open out again while both feet are on the floor, and the other knee comes up.',
+      'A slight forward lean helps with balance. Start slowly.'],
     'Tiptoe body waves': [
-      'The same wave as Body waves, rising onto the toes as the arms reach the top. Drop the heels as the arms swing down and behind.',
+      'This is the same wave as Body waves, with a rise onto the toes as the arms reach the top. The heels come down as the arms swing down and behind you.',
       'The calves tire quickly here. Slowing down is fine.'],
     'Twist the waist': [
-      'Stand tall and turn from side to side at the waist with the arms completely loose. Turning right, the left arm swings across to the right hip and the right arm swings behind you; then the other way.',
-      'Let the arms go completely loose.'],
+      'Stand tall and turn from side to side at the waist with the arms completely loose, letting the feet pivot with you. As you turn to the right, the left arm swings across to the right hip and the right arm swings behind you, and the turn to the left brings them back the other way.',
+      'Let the arms go completely loose, so that the turn swings them rather than the arms doing the work.'],
     'Ballet squats': [
-      'Feet wider than the shoulders and flat on the floor, toes turned out. Sink straight down as the arms come down at the sides, then rise as the arms sweep out and up, drawing a circle around you.',
+      'Stand with the feet wider than the shoulders, flat on the floor, and the toes turned out. Sink straight down as the arms come down at the sides, then rise as the arms sweep out and up, drawing a circle around you.',
       'Keep the back tall and the chest up, rather than folding forward at the hips.'],
     'Wide arm step backs': [
-      'Open the arms wide and straight as one foot steps back behind the other, letting the body turn a little. Step back to the middle and clap with straight arms, then the other side.',
+      'Open the arms wide and straight as one foot steps back behind the other, letting the body turn a little. Step back to the middle and clap with straight arms, then step the other foot back as the arms open again.',
       'Slow it down until the balance is there.'],
     'Backstep wave lunges': [
-      'Step one leg back into a light lunge while both arms rise overhead in one wave, so the stretch runs from the fingertips to the back foot. Come back to the middle together, then the other side.',
+      'Step one leg back into a light lunge while both arms rise overhead in one wave, so that the stretch runs from the fingertips to the back foot. Bring the leg and the arms back to the middle together, then step the other leg back.',
       'Dropping the back knee is optional. Go gently if your back is sore.'],
     'Pushups': [
-      'Any kind that lets you keep going: on the floor, on the knees, or with the hands on a couch or a wall.',
-      'Rest whenever you need to. Keep a straight line from head to heels.'],
+      'Do any kind that lets you keep going: on the floor, on the knees, or with the hands on a couch or a wall.',
+      'Rest whenever you need to, and keep a straight line from head to heels.'],
     'Jump rope': [
-      'Jump in place, with a rope or without one. Elbows loosely bent at your sides, the hands turning out from the body.',
-      'Small, quick jumps on the balls of the feet. Jumping without a rope counts.'],
+      'Jump in place, with a rope or without one, keeping the elbows loosely bent at your sides and turning the rope with the hands out from the body.',
+      'Keep the jumps small and quick, on the balls of the feet. Jumping without a rope counts.'],
   };
+
 
 
   // ---------- Settings ----------
