@@ -445,26 +445,24 @@
       return cycle([clap, back(1), clap, back(-1)]);
     })() },
 
-    // From standing, both arms swing forward and up as one foot travels
-    // back, knee bent, into a light lunge; the arms pulse once overhead
-    // (the wave); then they come down in front as the back foot lifts,
-    // swings forward with the knee bent, and plants. Then the other leg.
-    // One continuous motion, with only a breath at standing.
-    'Backstep wave lunges': { view: 'side', period: 5, stills: [0, 0.17], pose: (phase) => {
+    // One pendulum: both straight arms swing forward and up as one foot
+    // travels back, knee bent, into a light lunge, and come straight back
+    // down as the foot lifts and swings forward again. There is no hold
+    // and no stop at standing: as one leg plants, the other sets off.
+    'Backstep wave lunges': { view: 'side', period: 4.6, stills: [0, 0.25], pose: (phase) => {
       const p = ((phase % 1) + 1) % 1;
       const side = p < 0.5 ? 1 : -1, u = (p * 2) % 1;
-      const g = ramp(u, 0.02, 0.34), r = ramp(u, 0.6, 0.92);
-      const deep = g * (1 - r);
+      const deep = swing(u);
+      const g = ramp(u, 0, 0.5), r = ramp(u, 0.5, 1);
       const travel = Math.sin(Math.PI * g) * (1 - r) + Math.sin(Math.PI * r);
-      const pulse = Math.sin(Math.PI * ramp(u, 0.36, 0.58));
       const thigh = -36 * deep, shin = thigh - 30 * travel;
       const foot = 90 - 50 * clamp(deep + 0.8 * travel, 0, 1);
-      const ul = -10 + 182 * deep - 7 * pulse, fl = ul + 6 + 32 * pulse;
+      const ul = -10 + 182 * deep, fl = ul + 6;
       const back = [thigh, shin, foot], front = [30 * deep, -6 * deep, 90];
       const legs = side > 0
         ? { pr: back[0], sr: back[1], ftr: back[2], pl: front[0], sl: front[1], ftl: front[2] }
         : { pl: back[0], sl: back[1], ftl: back[2], pr: front[0], sr: front[1], ftr: front[2] };
-      return { t: 3 - 7 * deep - 2 * pulse, h: 6 - 14 * deep - 2 * pulse, ul, fl, ur: ul, fr: fl, ...legs };
+      return { t: 3 - 7 * deep, h: 6 - 14 * deep, ul, fl, ur: ul, fr: fl, ...legs };
     } },
 
     'Pushups': { view: 'side', period: 1.6, stills: [0, 0.5], pose: (phase) => {
