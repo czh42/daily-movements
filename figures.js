@@ -289,16 +289,23 @@
     return { t: 2, ul: a, fl: a, ur: b, fr: b, ...softKnees };
   };
 
-  // Big circles, both arms together: straight arms sweep up along the
-  // sides until the hands meet overhead, then the elbows bend and the hands
-  // come down in front of the chest, and out to the sides again. `dir` 1
-  // forward (up the sides, down the front), -1 backward (the reverse).
-  const bigCircles = (dir) => {
-    const keys = [
-      [0, 0], [-45, -45], [-90, -90], [-135, -135], [-180, -180], [-140, 104], [-100, 75], [-45, 53],
-    ].map(([u, f]) => ({ ul: u, fl: f, ur: -u, fr: -f, ...softKnees }));
-    const run = cycle(keys, true);
-    return (phase) => run(dir * phase);
+  // Big circles, both arms together and always straight: up along the
+  // sides until the hands meet overhead, then down in front of the body,
+  // and out to the sides again. The figure is turned a little toward the
+  // viewer, so an arm coming down in front reads as coming forward rather
+  // than shrinking. `dir` 1 forward (up the sides, down the front), -1
+  // backward (the reverse).
+  const bigCircles = (dir) => (phase) => {
+    const p = (((dir * phase) % 1) + 1) % 1;
+    const a0 = rad(360 * p);
+    const h = Math.abs(Math.sin(a0));
+    // Where the horizontal part of the arm points: out to the side on the
+    // way up, forward on the way down.
+    const psi = rad(90 * ramp(p, 0.3, 0.55) * (1 - ramp(p, 0.85, 1)));
+    const b = Math.asin(h * Math.cos(psi)) * 180 / Math.PI;
+    const a = Math.atan2(h * Math.sin(psi), Math.cos(a0)) * 180 / Math.PI;
+    return { phi: 30, far: [], uls: a, ull: b, fls: a, fll: b, urs: a, url: b, frs: a, frl: b,
+      pls: 5, sls: -5, prs: 5, srs: -5, ftll: 70, ftrl: 70 };
   };
 
   // Both arms swing together from side to side like a club, the whole body
@@ -354,9 +361,9 @@
   const marchOut = { ...marchLean, pls: 0, pll: 0, sls: 0, ftls: 90, prs: 0, prl: 0, srs: 0, ftrs: 90,
     tL: [-19, 11, 11], tR: [19, 11, 11], pL: [0, 0, -1], pR: [0, 0, -1] };
   const marchKnee = (side) => ({ ...marchLean,
-    pls: side < 0 ? 105 : 0, pll: side < 0 ? 4 : 0, sls: side < 0 ? 8 : 0, ftls: side < 0 ? 50 : 90,
-    prs: side > 0 ? 105 : 0, prl: side > 0 ? 4 : 0, srs: side > 0 ? 8 : 0, ftrs: side > 0 ? 50 : 90,
-    tL: [side * 6.5 - 1.85, 19, 8.5], tR: [side * 6.5 + 1.85, 19, 8.5], pL: [-0.4, -0.2, -1], pR: [0.4, -0.2, -1] });
+    pls: side < 0 ? 105 : 0, pll: side < 0 ? -8 : 0, sls: side < 0 ? 8 : 0, ftls: side < 0 ? 50 : 90,
+    prs: side > 0 ? 105 : 0, prl: side > 0 ? -8 : 0, srs: side > 0 ? 8 : 0, ftrs: side > 0 ? 50 : 90,
+    tL: [side * 2.25 - 1.75, 19, 8.5], tR: [side * 2.25 + 1.75, 19, 8.5], pL: [-0.4, -0.2, -1], pR: [0.4, -0.2, -1] });
 
   const MOVES = {
     'Lymphatic hops': { view: 'side', period: 0.55, stills: [0, 0.5], pose: cycle([
@@ -376,26 +383,28 @@
       return { turn: 58 * s, aL: hands, aR: hands, bL: -1, bR: 1, ...softKnees };
     } },
 
-    'Forward arm circles': { view: 'front', period: 2.2, stills: [0.25, 0.5, 0.75], pose: bigCircles(1) },
+    'Forward arm circles': { view: 'quarter', period: 2.2, stills: [0.25, 0.5, 0.75], pose: bigCircles(1) },
 
-    // Hinged forward, short of flat, so the back stays supported.
+    // A straight back leaning a little forward over bent knees, hovering,
+    // the arms hanging loose; the bounce comes from the knees.
     'Bent over back shakes': { view: 'side', period: 0.5, stills: [0, 0.5], pose: cycle([
-      { t: 62, h: 84, pl: 14, sl: -14, pr: 14, sr: -14, ul: 2, fl: 2, ur: 2, fr: 2 },
-      { t: 70, h: 94, pl: 19, sl: -19, pr: 19, sr: -19, ul: -6, fl: -4, ur: -6, fr: -4 },
+      { t: 30, h: 44, pl: 28, sl: -28, pr: 28, sr: -28, ul: 4, fl: 6, ur: 4, fr: 6 },
+      { t: 34, h: 50, pl: 35, sl: -35, pr: 35, sr: -35, ul: -3, fl: -1, ur: -3, fr: -1 },
     ]) },
 
-    'Backward arm circles': { view: 'front', period: 2.2, stills: [0.25, 0.5, 0.75], pose: bigCircles(-1) },
+    'Backward arm circles': { view: 'quarter', period: 2.2, stills: [0.25, 0.5, 0.75], pose: bigCircles(-1) },
 
-    // A sway with a light turn: a limp arm swings up so its forearm lands
-    // across the chest and rests there for a beat, the elbow hanging low,
-    // while the other arm hangs behind; then it drops, and the turn the
-    // other way brings the other arm up.
-    'Dead arms': { view: 'front', period: 3, stills: [0, 1 / 3, 0.5], pose: (() => {
-      const left = { t: -5, h: -3, turn: 25, turnHips: 6, ul: 25, fl: 150, ur: 14, fr: 10, far: ['ra'] };
-      const right = { t: 5, h: 3, turn: 25, turnHips: 6, ur: -25, fr: -150, ul: -14, fl: -10, far: ['la'] };
-      const down = { t: 0, h: 0, turn: 0, turnHips: 0, ul: -4, fl: -4, ur: 4, fr: 4, far: [] };
-      return cycle([left, left, down, right, right, down]);
-    })() },
+    // The upper body turns from side to side without stopping, and the
+    // limp arms follow a little behind: on each side the crossing arm's
+    // forearm flops up across the chest while the other arm swings behind.
+    'Dead arms': { view: 'front', period: 2.4, stills: [0.25, 0.5, 0.75], pose: (phase) => {
+      const th = phase * 2 * Math.PI, s = Math.sin(th);
+      const x = Math.sin(th - 0.35);
+      const fold = (v) => 125 * Math.pow(Math.max(0, v), 1.5);
+      const ul = 5.5 + 19.5 * x, ur = -5.5 + 19.5 * x;
+      return { t: -5 * s, h: -3 * s, turn: 28 * s, turnHips: 6 * s,
+        ul, fl: ul + fold(x), ur, fr: ur - fold(-x), far: s > 0.25 ? ['ra'] : s < -0.25 ? ['la'] : [] };
+    } },
 
     'Golf swings': { view: 'front', period: 1.7, stills: [0, 0.25, 0.5], pose: golf },
 
@@ -405,47 +414,56 @@
 
     'Twist the waist': { view: 'front', period: 1.8, stills: [0, 0.25, 0.5], pose: twist },
 
-    // Feet flat and turned out. Down in the squat the hands meet low in
-    // front; the arms sweep out and up along the sides as the legs
-    // straighten, until the hands meet overhead, and back down the same way.
-    'Ballet squats': { view: 'front', period: 2.8, stills: [0, 0.5], pose: (() => {
-      const legs = (d) => ({ pl: -20 - 32 * d, sl: -12 + 26.8 * d, pr: 20 + 32 * d, sr: 12 - 26.8 * d, ftl: -85, ftr: 85 });
-      const arms = (u, f) => ({ ul: u, fl: f, ur: -u, fr: -f });
-      const top = { ...legs(0), ...arms(-165, 140) }, v = { ...legs(0.15), ...arms(-135, -135) };
-      const t = { ...legs(0.4), ...arms(-90, -90) }, low = { ...legs(0.7), ...arms(-45, -45) };
-      const squat = { ...legs(1), ...arms(10, 15) };
-      return cycle([top, v, t, low, squat, squat, low, t, v], true);
-    })() },
+    // Feet flat and turned out. One flowing sweep: the arms come down along
+    // the sides as the legs bend, the forearms cross in front at the bottom
+    // and the sweep turns straight back up, out and over, until the hands
+    // meet overhead.
+    'Ballet squats': { view: 'front', period: 2.6, stills: [0, 0.5], pose: (phase) => {
+      const k = swing(phase);
+      const ul = -165 + 185 * k;
+      const fl = ul - 55 * (1 - ramp(k, 0, 0.2)) + 8 * ramp(k, 0.8, 1);
+      return { pl: -20 - 32 * k, sl: -12 + 26.8 * k, pr: 20 + 32 * k, sr: 12 - 26.8 * k, ftl: -85, ftr: 85, ul, fl, ur: -ul, fr: -fl };
+    } },
 
     // Straight arms open wide as one foot steps back behind the other and the
-    // body turns a little; back to the middle, the straight arms come
-    // together in front at shoulder height for a clap, foreshortened.
-    'Wide arm step backs': { view: 'front', period: 2.6, stills: [0, 0.25], pose: (() => {
-      const clap = { sL: [-1, -23], sR: [1, -23], far: [], turn: 0, turnHips: 0, t: 0, pl: 0, sl: 0, ftl: -90, pr: 0, sr: 0, ftr: 90 };
-      const open = (side) => ({ sL: [-34, -27], sR: [34, -27], far: [side > 0 ? 'rl' : 'll'], turn: 18, turnHips: 10, t: -3 * side,
-        pl: side < 0 ? 25 : 0, sl: side < 0 ? 20 : 0, ftl: side < 0 ? -60 : -90,
-        pr: side > 0 ? -25 : 0, sr: side > 0 ? -20 : 0, ftr: side > 0 ? 60 : 90 });
-      return cycle([clap, open(1), clap, open(-1)]);
+    // body turns a little; back to the middle, the straight arms sweep
+    // forward to meet at shoulder height for a clap. Seen from a slight
+    // angle, so the arms keep their length as they come forward.
+    'Wide arm step backs': { view: 'quarter', period: 2.6, stills: [0, 0.25], pose: (() => {
+      const arms = (b) => ({ uls: 90, ull: b, fls: 90, fll: b, urs: 90, url: b, frs: 90, frl: b });
+      const stand = { pls: 0, pll: 0, sls: 0, sll: 0, ftls: 90, ftll: 70, prs: 0, prl: 0, srs: 0, srl: 0, ftrs: 90, ftrl: 70 };
+      const clap = { ...arms(-15), ...stand, phi: 38, far: [] };
+      const back = (side) => ({ ...arms(90), ...stand, phi: 38 + 10 * side, far: [side > 0 ? 'rl' : 'll'],
+        ...(side < 0 ? { pls: -28, pll: -20, sls: -28, sll: -20, ftls: 30, ftll: 0 } : { prs: -28, prl: -20, srs: -28, srl: -20, ftrs: 30, ftrl: 0 }) });
+      return cycle([clap, back(1), clap, back(-1)]);
     })() },
 
-    // One motion: the foot lifts and travels back into a light lunge as
-    // both arms rise overhead, then lifts and comes forward again as they
-    // come down. Then the other leg.
-    'Backstep wave lunges': { view: 'side', period: 3.2, stills: [0, 0.25], pose: (() => {
-      const stand = { t: 3, h: 6, ul: 10, fl: 16, ur: 10, fr: 16, pl: 0, sl: 0, ftl: 90, pr: 0, sr: 0, ftr: 90 };
-      const step = (side) => ({ t: 0, h: 0, ul: 90, fl: 96, ur: 90, fr: 96,
-        pl: side < 0 ? -25 : 0, sl: side < 0 ? 35 : 0, ftl: side < 0 ? 60 : 90,
-        pr: side > 0 ? -25 : 0, sr: side > 0 ? 35 : 0, ftr: side > 0 ? 60 : 90 });
-      const lunge = (side) => ({ t: -4, h: -8, ul: 172, fl: 178, ur: 172, fr: 178,
-        pl: side < 0 ? -38 : 40, sl: side < 0 ? -38 : -5, ftl: side < 0 ? 40 : 90,
-        pr: side > 0 ? -38 : 40, sr: side > 0 ? -38 : -5, ftr: side > 0 ? 40 : 90 });
-      return cycle([stand, step(1), lunge(1), step(1), stand, step(-1), lunge(-1), step(-1)]);
+    // From standing, both arms swing forward and up as one foot travels
+    // back, knee bent, into a light lunge; the arms pulse once overhead
+    // (the wave); then they come down in front as the back foot lifts,
+    // swings forward with the knee bent, and plants. Then the other leg.
+    'Backstep wave lunges': { view: 'side', period: 5, stills: [0, 2 / 7], pose: (() => {
+      const legs = (side, back, front) => (side > 0
+        ? { pr: back[0], sr: back[1], ftr: back[2], pl: front[0], sl: front[1], ftl: front[2] }
+        : { pl: back[0], sl: back[1], ftl: back[2], pr: front[0], sr: front[1], ftr: front[2] });
+      const stand = { t: 3, h: 6, ul: -10, fl: -8, ur: -10, fr: -8, pl: 0, sl: 0, ftl: 90, pr: 0, sr: 0, ftr: 90 };
+      const going = (side) => ({ t: 0, h: 0, ul: 90, fl: 96, ur: 90, fr: 96, ...legs(side, [-20, -45, 30], [0, 0, 90]) });
+      const lunge = (side) => ({ t: -4, h: -8, ul: 172, fl: 178, ur: 172, fr: 178, ...legs(side, [-36, -36, 40], [30, -6, 90]) });
+      const wave = (side) => ({ ...lunge(side), t: -6, h: -10, ul: 165, fl: -150, ur: 165, fr: -150 });
+      const coming = (side) => ({ t: 0, h: 0, ul: 90, fl: 96, ur: 90, fr: 96, ...legs(side, [-15, -50, 40], [0, 0, 90]) });
+      const one = (side) => [stand, going(side), lunge(side), wave(side), lunge(side), coming(side), stand];
+      return cycle([...one(1), ...one(-1)]);
     })() },
 
-    'Pushups': { view: 'side', period: 1.6, stills: [0, 0.5], pose: cycle([
-      { t: 72, h: 95, pl: -72, sl: -72, pr: -72, sr: -72, ftl: 0, ftr: 0, aL: [24.7, 19], aR: [24.7, 19], bL: -1, bR: -1, floor: true, dx: 8 },
-      { t: 80, h: 100, pl: -80, sl: -80, pr: -80, sr: -80, ftl: 0, ftr: 0, aL: [25, 14], aR: [25, 14], bL: -1, bR: -1, floor: true, dx: 8 },
-    ]) },
+    // The toes and the hands stay where they are; the straight body pivots
+    // on the toes as the elbows bend and straighten.
+    'Pushups': { view: 'side', period: 1.6, stills: [0, 0.5], pose: (phase) => {
+      const t = 72 + 8 * swing(phase), T = rad(t);
+      const toe = [-(L.thigh + L.shin) * Math.sin(T), (L.thigh + L.shin) * Math.cos(T) + L.foot];
+      const ox = 28 - toe[0], oy = GROUND - toe[1];
+      const hand = [93 - ox, GROUND - 0.7 - oy];
+      return { t, h: t + 22, pl: -t, sl: -t, pr: -t, sr: -t, ftl: 0, ftr: 0, aL: hand, aR: hand, bL: -1, bR: -1, floor: true, dx: ox - CX };
+    } },
 
     // Elbows loosely bent at the sides, hands turning out from the body.
     'Jump rope': { view: 'front', period: 0.6, stills: [0, 0.5], pose: rope },

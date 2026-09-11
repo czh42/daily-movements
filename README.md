@@ -152,6 +152,10 @@ change can be checked against them:
   beat between knees, the rope keeps its length and passes under the
   feet while the body is in the air. A movement that never pauses is
   drawn at a steady pace rather than settling at each pose.
+- A straight arm swung toward the viewer has to look shorter in a flat
+  drawing. Where that would mislead, in the arm circles and the clap of
+  the step backs, the figure is turned a little, thirty degrees, with
+  both arms in ink, so the arm reads as coming forward instead.
 - Rows in the list are the same size on a phone and a laptop; the body
   area tags hide on phones so every row stays one line.
 
