@@ -160,13 +160,6 @@ change can be checked against them:
 - Rows in the list are the same size on a phone and a laptop; the body
   area tags hide on phones so every row stays one line.
 
-## Putting it online later
-
-The folder is a plain static site. Any static host will serve it as is:
-Cloudflare Pages, Netlify, GitHub Pages, or a folder on an existing
-site. Nothing needs to be built. Once it has an address, "Add to Home
-Screen" on a phone gives it an icon of its own.
-
 ## Fonts
 
 Petrona and IBM Plex Mono are self-hosted in `fonts/`, both under the
