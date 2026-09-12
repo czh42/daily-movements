@@ -1,4 +1,4 @@
-/* Morning movements: the line figures.
+/* Daily movements: the line figures.
 
    One small figure per move, drawn from joint angles so the limbs keep their
    lengths, and moved by a phase that runs from 0 to 1 over the move's period.

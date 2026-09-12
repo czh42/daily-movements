@@ -1,4 +1,4 @@
-# Morning movements
+# Daily movements
 
 A small personal timer for a daily routine of gentle movements. Seventeen
 exercises, one minute each, with fifteen seconds of rest between them.
@@ -17,7 +17,7 @@ Spencer's own guidance is on his site.
 Open `index.html` in a browser. Everything is inside this folder, so it
 works offline and without a server.
 
-The title, "Morning movements", is the way home: pressing it returns to
+The title, "Daily movements", is the way home: pressing it returns to
 the start screen with no option chosen and the list closed. During a
 session it asks first, like End, and a second press goes.
 
@@ -26,7 +26,7 @@ full original routine** or **I want to customize my routine**. Whatever
 you choose, a sentence above Begin states exactly what pressing it will
 start: the routine's length, how many exercises, and the timing. Begin
 cannot be pressed until a choice is made, and the choice is remembered,
-so the next morning is one press. Either choice opens the list of
+so the next time is one press. Either choice opens the list of
 exercises beside the text (below it on a phone) as a checklist. A
 ten-second "Get ready" count comes before the first exercise.
 
