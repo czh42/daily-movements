@@ -702,12 +702,12 @@
         </div>
         <div class="row">
           <label class="lbl" for="work">Time per exercise</label>
-          <input type="range" id="work" min="10" max="120" step="5">
+          <input type="range" id="work" min="10" max="240" step="1">
           <output id="work-out" for="work"></output>
         </div>
         <div class="row">
           <label class="lbl" for="rest">Rest between exercises</label>
-          <input type="range" id="rest" min="0" max="60" step="5">
+          <input type="range" id="rest" min="0" max="120" step="1">
           <output id="rest-out" for="rest"></output>
         </div>
         <div class="outcome" id="outcome"></div>
@@ -865,6 +865,14 @@
   const SETTINGS = 'morning-qigong-settings';
 
   const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+  // Seconds for the sliders; for prose, minutes and seconds once past a minute and a half.
+  const secs = (n) => plural(Math.round(n), 'second');
+  const duration = (n) => {
+    n = Math.round(n);
+    if (n <= 90) return plural(n, 'second');
+    const m = Math.floor(n / 60), r = n % 60;
+    return r ? `${plural(m, 'minute')} ${plural(r, 'second')}` : plural(m, 'minute');
+  };
   const clampMinutes = (v) => Math.min(60, Math.max(1, Math.round(v)));
 
   const validIdx = (arr) => Array.isArray(arr)
@@ -879,6 +887,7 @@
       if (s && Number.isFinite(s.minutes) && s.minutes >= 1) out.minutes = clampMinutes(s.minutes);
       if (s && Number.isFinite(s.work) && s.work >= 1) out.work = s.work;
       if (s && Number.isFinite(s.rest) && s.rest >= 0) out.rest = s.rest;
+      if (s && ['work', 'rest'].includes(s.pin)) out.pin = s.pin;
       if (s && validIdx(s.set) && Number.isInteger(s.setFor)) { out.set = validIdx(s.set); out.setFor = s.setFor; }
       return out;
     } catch (e) { return {}; }
@@ -886,18 +895,50 @@
   function saveSettings() {
     try {
       localStorage.setItem(SETTINGS, JSON.stringify({
-        choice: cfg.choice, minutes: cfg.minutes, work: cfg.work, rest: cfg.rest, set: cfg.set, setFor: cfg.setFor,
+        choice: cfg.choice, minutes: cfg.minutes, work: cfg.work, rest: cfg.rest, pin: cfg.pin, set: cfg.set, setFor: cfg.setFor,
       }));
     } catch (e) {}
   }
 
-  const cfg = { choice: null, minutes: BASE.minutes, work: BASE.work, rest: BASE.rest, set: null, setFor: null, ...loadSettings() };
+  const cfg = { choice: null, minutes: BASE.minutes, work: BASE.work, rest: BASE.rest, pin: null, set: null, setFor: null, ...loadSettings() };
 
-  // The durations in force: the custom ones only once "customize" is chosen.
-  const eff = () => cfg.choice === 'custom' ? { work: cfg.work, rest: cfg.rest } : { work: BASE.work, rest: BASE.rest };
+  // The sliders' reach, as in the markup.
+  const RANGE = { work: [10, 240], rest: [0, 120] };
+  const clampTo = (key, v) => Math.min(RANGE[key][1], Math.max(RANGE[key][0], v));
+  // The seconds the full routine takes at given durations, and the seconds there are.
+  const needs = (work, rest) => N * work + (N - 1) * rest;
+  const have = () => cfg.minutes * 60;
 
-  // How many moves the available minutes hold at the custom durations.
-  const fits = () => Math.min(N, Math.max(1, Math.floor((cfg.minutes * 60 + cfg.rest) / (cfg.work + cfg.rest))));
+  // Whether the time holds more than the full routine needs at the slider
+  // settings. Past that point the routine fills the time instead.
+  const stretched = () => cfg.choice === 'custom' && have() > needs(cfg.work, cfg.rest);
+
+  // The durations in force. The original routine always runs at BASE. A
+  // custom routine runs at the slider settings, unless the time holds more
+  // than the full routine needs at them: then both grow in proportion so
+  // that all the moves fill the time, or, if one slider was moved past
+  // that point, it holds where it was put and the other takes up the slack.
+  function eff() {
+    if (cfg.choice !== 'custom') return { work: BASE.work, rest: BASE.rest };
+    if (!stretched()) return { work: cfg.work, rest: cfg.rest };
+    const T = have();
+    if (cfg.pin === 'work') {
+      const rest = clampTo('rest', Math.floor((T - N * cfg.work) / (N - 1)));
+      if (needs(cfg.work, rest) <= T) return { work: cfg.work, rest };
+    } else if (cfg.pin === 'rest') {
+      const work = clampTo('work', Math.floor((T - (N - 1) * cfg.rest) / N));
+      if (needs(work, cfg.rest) <= T) return { work, rest: cfg.rest };
+    }
+    let k = T / needs(cfg.work, cfg.rest);
+    k = Math.min(k, RANGE.work[1] / cfg.work, cfg.rest > 0 ? RANGE.rest[1] / cfg.rest : k);
+    return { work: Math.floor(cfg.work * k), rest: Math.floor(cfg.rest * k) };
+  }
+
+  // How many moves the available minutes hold at the durations in force.
+  const fits = () => {
+    const { work, rest } = eff();
+    return Math.min(N, Math.max(1, Math.floor((have() + rest) / (work + rest) + 1e-9)));
+  };
 
   // ---------- Choosing moves ----------
   function shuffle(a) {
@@ -1182,8 +1223,8 @@
     }
     const { work, rest } = eff();
     const minutes = Math.max(1, Math.round(routineSeconds() / 60));
-    const each = n === 1 ? plural(work, 'second') : `${plural(work, 'second')} each`;
-    const restWords = rest > 0 ? `with ${plural(rest, 'second')} of rest in between` : 'with no rest in between';
+    const each = n === 1 ? duration(work) : `${duration(work)} each`;
+    const restWords = rest > 0 ? `with ${duration(rest)} of rest in between` : 'with no rest in between';
     const opening = cfg.choice === 'custom' ? "Today's routine" : 'The default routine';
     el.summary.innerHTML = `${opening} will take around <strong>${plural(minutes, 'minute')}</strong> in total. This consists of <strong>${plural(n, 'exercise')}</strong> of ${each}, ${restWords}.${pace}`;
   }
@@ -1222,13 +1263,15 @@
 
   function renderSettings() {
     if (document.activeElement !== el.minutes) el.minutes.value = cfg.minutes;
-    el.work.value = cfg.work;
-    el.rest.value = cfg.rest;
-    el.workOut.textContent = plural(cfg.work, 'second');
-    el.restOut.textContent = cfg.rest > 0 ? plural(cfg.rest, 'second') : 'none';
+    const { work, rest } = eff();
+    el.work.value = work;
+    el.rest.value = rest;
+    el.workOut.textContent = secs(work);
+    el.restOut.textContent = rest > 0 ? secs(rest) : 'none';
     const n = fits();
+    const boxes = 'You can still remove or re-add individual exercises by clicking their respective boxes.';
     el.outcome.innerHTML = n >= N
-      ? `<p><strong>That's enough time for the full routine, so all ${N} exercises are selected.</strong> You can still remove or re-add individual exercises by clicking their respective boxes.</p>`
+      ? `<p><strong>That's enough time for the full routine, so all ${N} exercises are selected.</strong> ${stretched() ? 'We\'ve adjusted the duration and rest periods for each exercise to fill the additional space. ' : ''}${boxes}</p>`
       : `<p><strong>That's room for ${plural(n, 'exercise')}.</strong> We've automatically selected a balanced mix of moves for you, working the shoulders, spine, hips, legs, and overall circulation.</p>`
         + `<p>To change the selection, press "Pick again" at the bottom of the list for a new mix. You can also add or remove individual exercises by clicking their respective boxes.</p>`;
   }
@@ -1589,13 +1632,21 @@
   for (const b of el.settings.querySelectorAll('.step')) {
     b.addEventListener('click', () => change(() => { cfg.minutes = clampMinutes(cfg.minutes + Number(b.dataset.d)); }));
   }
-  el.work.addEventListener('input', () => change(() => { cfg.work = Number(el.work.value); }));
-  el.rest.addEventListener('input', () => change(() => { cfg.rest = Number(el.rest.value); }));
+  // A slider sets its own duration. If that leaves the time holding more
+  // than the full routine needs, this slider holds and the other one
+  // takes up the slack; otherwise both are plainly what they show.
+  function setDuration(which, v) {
+    cfg[which] = v;
+    cfg.pin = have() > needs(cfg.work, cfg.rest) ? which : null;
+  }
+  el.work.addEventListener('input', () => change(() => setDuration('work', Number(el.work.value))));
+  el.rest.addEventListener('input', () => change(() => setDuration('rest', Number(el.rest.value))));
   el.pickAgain.addEventListener('click', () => change(pickAgain));
   el.resetTiming.addEventListener('click', () => change(() => {
     cfg.minutes = BASE.minutes;
     cfg.work = BASE.work;
     cfg.rest = BASE.rest;
+    cfg.pin = null;
     cfg.set = null;
     cfg.setFor = null;
   }));

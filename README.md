@@ -68,13 +68,22 @@ During a session:
 Choosing **customize** unfolds settings inline, before Begin:
 
 - **How much time do you have?** A minutes field with − and +.
-- **Time per exercise** (10 to 120 seconds) and **Rest between
-  exercises** (none to 60).
+- **Time per exercise** (10 seconds to 4 minutes) and **Rest between
+  exercises** (none to 2 minutes).
 - A short block saying how many exercises that time holds, and that a
   balanced mix across the four body areas (shoulders & arms, spine,
   hips & legs, circulation) has been selected, in the routine's own
-  order. When the time holds all 17, all 17 are selected.
+  order. When the time holds all 17, all 17 are selected. When it holds
+  more than all 17 need, the routine fills it: the time per exercise
+  and the rest grow in proportion, the sliders show the durations in
+  force, and the block says so.
 - **Reset to default** restores 21 minutes, 60 and 15, and a fresh set.
+
+Past that point a slider you move holds where you put it and the other
+one takes up the slack, so the routine keeps filling the time. Move a
+slider far enough that all 17 no longer fit and both are plainly what
+they show, as below the cap; and the values set below the cap stay
+your settings, so shortening the time later brings them back.
 
 The set is drawn again whenever the time or durations change how many
 exercises fit. **Pick again** under the list draws a new mix with as
